@@ -35,7 +35,7 @@ pub fn parse_for(raw:&[u8],website:&str)->Result<Content> {
     }
     Ok(value)
 }
-/// 只用编译期固定的 Meowopia 资讯源。通用版必须通过发行配置提供 `contentUrl`。
+/// 只用编译期固定的定制版资讯源。通用版必须通过发行配置提供 `contentUrl`。
 pub async fn fetch()->Result<Content> {
     if crate::edition::is_sponsor(){return Err(error("public_config_required","通用版未配置官网资讯地址，请在发行配置中填写。"))}
     fetch_from(SOURCE,"https://launcher.invalid").await

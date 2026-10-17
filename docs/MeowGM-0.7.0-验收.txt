@@ -1,4 +1,4 @@
-﻿MeowGM 0.7.0 — 文件范围与验收记录
+MeowGM 0.7.0 — 文件范围与验收记录
 
 目标：独立 MeowGM EXE；先修旧版功能，再合并 0.7.0 UI，一次统一验收。
 源码版本：apps/manager 和 apps/launcher 当前均为 0.7.0。未改 apps/launcher 或共享 Rust core。
@@ -7,7 +7,7 @@
 apps/manager：Rust 窗口/后端生命周期、启动诊断、发行版更新来源与数据隔离、版本、使用说明。
 apps/admin：初始化、交互忙碌状态、管理员改名、连接配置、环境选择、0.7.0样式、公开配置可选来源。
 services/gateway：PVF可选适配、初始化与账号改名、旧连接容错和保留备份重置、115环境配置、115只读账号/角色查询、旧宿主停用、公开配置兼容校验与测试。
-tools/build-manager.ps1：独立EXE打包，使用D盘工具链/缓存，支持sponsor与meowopia-custom，无已丢失的“登陆器赞助版”依赖。
+tools/build-manager.ps1：独立EXE打包，使用D盘工具链/缓存，支持 sponsor 与定制版两种编译，无已丢失的“登陆器赞助版”依赖。
 
 已实现
 - 初始化账号/密码/确认密码字段与错误反馈；设置中改名，校验当前密码并记录审计。
@@ -18,7 +18,7 @@ tools/build-manager.ps1：独立EXE打包，使用D盘工具链/缓存，支持s
 - 115US本地玩家查询：从所选环境固定local.json读取绝对sqlite_path；SQLite mode=ro和query_only，字段与账号归属查询，不创建、迁移或修改玩家表；超限拒绝，不将截断清单标成完整数据。
 - 新EXE默认115US；旧86写入、部署、隧道启动与探测入口在后端拦截；没有启回旧服、恢复旧游戏数据。
 - 旧MeowCore宿主和商城调用返回410，UI不再加载旧插件管理脚本。
-- 通用版更新地址只读同目录launcher.public.json/updateBaseUrl；无配置时明确报不可用，不回退Meowopia；默认数据目录与定制版分离。
+- 通用版更新地址只读同目录launcher.public.json/updateBaseUrl；无配置时明确报不可用，不回退到内置定制服务；默认数据目录与定制版分离。
 - 保留旧14字段公开配置；新增字段遵守Rust契约，来源URL必须HTTPS，资源来源同源且三项完整。
 
 实际边界

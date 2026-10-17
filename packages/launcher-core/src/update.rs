@@ -5,7 +5,7 @@ use sha2::{Digest,Sha256};
 use std::{io::{Read,Write},path::{Path,PathBuf},sync::{Mutex,atomic::{AtomicBool,Ordering}},time::Duration};
 pub const EDITION:&str=crate::edition::ID;
 pub const NOTES:&str=crate::edition::NOTES;
-const LEGACY_NOTES:&str="OOArad为Meowopia服务器定制版";
+const LEGACY_NOTES:&str="OOArad 定制版";
 /// Notes accepted from a release manifest. The custom edition keeps its own
 /// string plus the historical one; the generic edition accepts its own label or
 /// the bare product name so a server owner does not have to copy a magic string.
@@ -95,7 +95,7 @@ struct Busy<'a>(&'a AtomicBool);impl Drop for Busy<'_>{fn drop(&mut self){self.0
 pub struct Downloaded {pub version:String,pub program:&'static str,pub verified:bool,pub directory:String}
 impl Updater {
  /// `base` must already pass `validate_base`; callers pass the compiled
- /// Meowopia origin or the operator's `updateBaseUrl`.
+ /// Built-in origin or the operator's `updateBaseUrl`.
  pub fn new(base:&str,program:Program,channel:&'static str,current:&'static str)->Self{Self{base:base.to_owned(),program,channel,current,busy:AtomicBool::new(false),downloaded:Mutex::new(None)}}
  pub fn base(&self)->&str{&self.base}
  pub async fn download(&self,root:&Path)->Result<Downloaded> {

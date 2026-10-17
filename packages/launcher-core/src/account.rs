@@ -38,7 +38,7 @@ impl Drop for SessionResponse { fn drop(&mut self) { use zeroize::Zeroize; self.
 struct TicketResponse { ok: bool, uid: String, ticket: String, expires_in: u64, protocol: String }
 impl Drop for TicketResponse { fn drop(&mut self) { use zeroize::Zeroize; self.ticket.zeroize(); } }
 impl AccountClient {
-    /// 只用编译期固定的 Meowopia 账号服务。通用版（sponsor）没有默认账号服务：
+    /// 只用编译期固定的定制版账号服务。通用版（sponsor）没有默认账号服务：
     /// 它必须拿到服主的 `launcher.public.json`，否则会在取到地址前就失败。
     pub fn new() -> Result<Self> {
         if crate::edition::is_sponsor() {return Err(error("public_config_required","通用版必须使用服主提供的发行配置，不会连接默认账号服务。"));}
