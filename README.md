@@ -1,4 +1,4 @@
-﻿# MeowGM
+# MeowGM
 
 面向 86s4a21 / 115US 客户端的 **GM 管理与网关工具套件**：GM 管理器（Rust + Tauri 2 + WebView2）、管理后台、Python 网关服务，以及与 MeowLauncher 共用的核心库副本。
 
@@ -76,6 +76,11 @@ cargo test -p meow-launcher-core --locked
 本仓库为**脱敏版本**：不包含任何真实服务器地址、IP、域名、证书或私钥；与线上服务相关的端点均为不可路由的
 占位符（`launcher.invalid`、`203.0.113.10`）。`packages/launcher-core` 是 MeowLauncher 核心库的同步副本；
 开发辅助脚本中的 `C:/workspace`、`upstream/` 等为占位路径，请按本机环境调整。
+
+## 参考与致谢
+
+- 实现参考了上游 115 启动器项目 [`gitgud.io/yh9/115us-dfolauncher`](https://gitgud.io/yh9/115us-dfolauncher)。该上游仓库未声明开源许可证；本仓库不包含其源码副本，仅在接口形态与实现思路上参考。
+- 编译期内嵌的宿主程序由上游 Go 工程构建（`MEOW_UPSTREAM_DIR` 指向的上游仓库，GPL-3.0）；若重新分发该内嵌二进制，需同时履行上游 GPL-3.0 的源码提供义务。
 
 ## 许可
 

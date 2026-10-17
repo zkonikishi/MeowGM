@@ -1,4 +1,4 @@
-﻿MeowGM 使用声明
+MeowGM 使用声明
 
 1. 本项目仅供免费技术交流与个人学习研究使用，严禁倒卖、收费传播或任何形式的商业牟利。
 2. 如您通过付费购买获得本项目，请联系卖家申请退款。
@@ -10,5 +10,7 @@
 7. 本开源仓库为脱敏版本：不包含任何真实服务器地址、IP、域名、证书或私钥；
    所有线上服务端点均为不可路由的占位符（launcher.invalid / 203.0.113.10）。
 8. 开发辅助脚本中的 C:/workspace、upstream/、C:/rust-toolchain、C:/dev-toolchain 等为占位路径，请按本机环境调整。
+9. 实现参考了上游 115 启动器项目 gitgud.io/yh9/115us-dfolauncher（上游未声明开源许可证；本仓库未拷贝其源码）。
+   编译期内嵌的宿主程序由上游 Go 工程（GPL-3.0）构建，重新分发内嵌二进制时须履行该许可证的源码提供义务。
 
 Copyright (c) MeowGM contributors. All rights reserved.
