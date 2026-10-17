@@ -1,0 +1,15 @@
+# 只填写在服务器/管理台进程环境，不放入启动器产物或前端。
+OO_PLATFORM_URL=https://YOUR_PLATFORM_HOST
+OO_PLATFORM_GATEWAY_KEY=<独立消费密钥，至少32字符>
+OO_PLATFORM_ADMIN_KEY=<独立管理密钥，与消费密钥不同>
+OO_PLATFORM_CA_FILE=<私有CA文件，可选；默认系统受信CA>
+OO_GAME_KEY=<游戏服务与同机入场网关之间的独立密钥>
+OO_ADMISSION_PORT=17861
+OO_ADMISSION_DATA=<网关独立数据目录>
+OO_GM_URL=http://127.0.0.1:5051
+OO_GM_PASSWORD=<GM启用认证时提供，保持在服务端>
+
+运行 python services/gateway/admission.py 为入场网关，固定回环监听。
+运行 python services/gateway/server.py 为运营管理台，固定回环监听。
+远程GM使用已核验主机身份的SSH隧道到本机，不向公网开放旧GM。
+未配置各服务时对应操作拒绝，不伪造成功；管理员schema已由正式004交付，本地最小运行权限测试通过，生产仍以当次部署验收为准。

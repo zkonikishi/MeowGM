@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "MeowGM",
+  "version": "0.7.4",
+  "identifier": "com.meowopia.oo-manager",
+  "build": {
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self'",
+      "capabilities": [
+        {
+          "identifier": "manager-local",
+          "windows": [
+            "main"
+          ],
+          "remote": {
+            "urls": [
+              "http://127.0.0.1:*"
+            ]
+          },
+          "permissions": [
+            "allow-choose-package-directory"
+          ]
+        }
+      ]
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": false,
+    "icon": []
+  }
+}

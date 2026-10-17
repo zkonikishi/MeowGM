@@ -1,0 +1,1836 @@
+/* DFO-115US 单机一键端 · 界面样式（M0）
+   参考：docs/launcher/参考界面-DFO90一键端.jpg
+   风格：全幅 artwork + 半透明毛玻璃卡片 + 青蓝/琥珀强调色 */
+
+:root {
+  /* 让 WebView2 的原生控件（下拉、数字微调、未自定义的滚动条）按深色渲染，
+     否则在深色界面上会冒出浅色控件。 */
+  color-scheme: dark;
+  --accent: #37b6ff;
+  --accent-dim: rgba(55, 182, 255, .18);
+  --amber-1: #f5a623;
+  --amber-2: #ffd166;
+  /* 「开始游戏」那套主按钮的蓝色版本（浅→深同向渐变），供 .btn-gm 用。
+     --blue-1 直接取 --accent，保证蓝色系与全局强调色是同一个值。 */
+  --blue-1: var(--accent);
+  --blue-2: #7fdcff;
+  --ok: #35d07f;
+  --warn: #ffc53d;
+  --err: #ff5c5c;
+  --muted: #8a94a6;
+  --text: #e8edf4;
+  --panel: rgba(10, 14, 20, .72);
+  --panel-2: rgba(14, 19, 27, .78);
+  --panel-border: rgba(255, 255, 255, .08);
+  --radius: 14px;
+  /* 左轨统一宽度：状态/更新卡片与运行日志面板共用同一个值，
+     两者都从 #main 的左内边距起算，所以只要宽度一致就自动对齐。
+     2026-10-06 由 460px 调到 520px：用户反馈「左边容器给得太少，更新页在卡片里出滚动条」——
+     容器设计（左轨卡片 + 页签）不变，只是每行能多放几个元素，再配合下面 #tab-update 的紧凑排布，
+     让「更新」页整体落在卡片高度内、不再滚。 */
+  /* 左轨（首页卡片 + 运行日志面板 + 编译进度横幅）的基准宽。
+     业主 2026-10-06：「将左侧区域增大百分之八十左右」——原来固定 520px，1.8 倍就是 936px。
+     现在按视口取 75vw，上限 940px（≈936，就是业主说的那个数）：1080 宽的窗口下是 810px、
+     1280 及以上直接吃满 940px（相对 520 是 1.81 倍），再宽也不会继续膨胀 ——
+     不然背景原画会被压没，卡片本身也读不过来。
+     下限 320px 是窄窗兜底（--rail 外面还套了 calc(100vw - 130px)，保证右侧永远留得下背景）。 */
+  --rail-w: clamp(320px, 75vw, 940px);
+  /* 左轨实际取值。卡片、日志面板与编译进度横幅必须共用这一个表达式，不能各写一份 min()：
+     原先卡片是 min(--rail-w, 100%)、日志是 min(--rail-w, 100vw - 130px)，
+     两个公式在窄窗下会分叉（实测 533px 视口下 460 对 403），对齐就破了。
+     末尾这个 650px 是业主 2026-10-06 的第二念：先要"左侧区域增大百分之八十"到 940，
+     随后按手绘框收回来 —— 量出来的框是 x 23→666（宽 644），竖向 y 64→806 正好等于
+     卡片顶到日志底，所以框与现状**只差宽度**。卡片左边界在 x=14，取 14→664 即 650px。
+     写成 min() 的第三项而不是改上面的 940：只许变窄、不许变宽，窄窗仍按 75vw 走。 */
+  --rail: min(var(--rail-w), calc(100vw - 130px), 650px);
+  /* 底部声明条的实际高度。原先 #main 下内边距、#logpanel/#toolslot/.account 的 bottom
+     四处都硬编 52px 递推，而声明条是两条长文案、高度随窗口宽度变
+     （实测 ≥1080 宽 49px、1000 宽 66px、741 宽 83px）。
+     由 app.js 的 syncNoteHeight() 写入；52px 只是 JS 跑起来前的兜底值。 */
+  --note-h: 52px;
+  /* 底部那一整簇（运行日志 / 操作条 / 账号 / 工具）相对声明条再上抬的量。
+     12px 是实测值，取自首页左上的间距：「启动器 · 版本」那行底边 51 → 状态卡顶边 62，
+     让上下两段的呼吸感一致。
+     必须独立成一项而不是烘进 --note-h：后者是 app.js 的 syncNoteHeight() 按声明条
+     实测高度动态写的（两条长文案，随窗口宽度变），加进去就漂了。 */
+  --lift: 12px;
+  /* 「工具」按钮的定宽。.account 的 right 由它反推，
+     所以不能是内容撑开的自适应宽，否则两处几何会随文案漂移。 */
+  --toolbtn-w: 72px;
+
+  /* 右下那两颗悬浮按钮（`工具` #toolbtn 与 `首页` #btnHomeBack）占掉的高度带。
+     它们不是排在布局里的，而是 `position: fixed; bottom: calc(--note-h + --lift + 74px)`、
+     高 44px —— 也就是**悬在内容区内部**，从内容区底边往上 74 ~ 118px 这一段。
+     `#main` 的底部内边距只算了声明条（--note-h + --lift），没给这两颗留位置；
+     大多数页面内容够短、碰不到，但**占满整高的卡片会伸进去**（业主 2026-10-07：
+     「mod 页面稍微缩短一点点，翻页按钮被首页和工具按钮挡住了」）。
+     118px = 74（按钮 bottom 偏移）+ 44（按钮高）。改这两颗的定位时这个值要跟着改。 */
+  --floatbtn-band: 118px;
+
+  /* ---------- 液态玻璃（第五十一批，只做简洁版这一棵树） ----------
+     面板背景滤镜的唯一出处。--glass 的基线是纯磨砂；下面 html.glass 那条把它换成
+     "磨砂 + 真折射"。折射靠 index.html 里那张法线图驱动的位移滤镜（见那边的注释），
+     由 app.js 确认可用后才给 <html> 加 glass 类 —— 不支持的运行时自动停在基线上。
+     顺序是实测出来的硬约束：blur 必须排在 url() **前面**（先糊再折）。反过来
+     （url() 再 blur）会把刚折出来的边缘重新抹平，肉眼等于没做。 */
+  --glass: blur(18px) saturate(1.35);
+  --glass-item: blur(14px) saturate(1.3);
+}
+
+/* 折射档：换掉那几块"浮在原画上"的底板的滤镜、底色、描边与投影。
+   底色必须比 --panel / --panel-2 更透（.72/.78 → .56/.62），否则边缘折射被自己的
+   深色底挡住，等于白付一次滤镜开销。按钮、下拉、表格行这些小控件不在这批里，
+   仍走 --panel*，免得在亮背景上改出对比度问题。
+
+   下面这几个令牌**只在 html.glass 上定义**，各表面用 var(--glass-fill, 原值) 取值：
+   没有 glass 类时 var() 走 fallback，每条规则保持自己原本的底色；加上类才整体换配方。
+   之所以不写成 `html.glass .card { background: … }` 那种选择器覆盖 —— 那会把特异性抬到
+   类比 .btn-homeback:hover 更高的一档，反过来吃掉写在后面的危险卡片红边和悬停高亮，
+   状态样式静默失效，界面上看不出链接断了。 */
+html.glass {
+  --glass: blur(18px) saturate(1.45) url(#ldg-edge);
+  --glass-item: blur(14px) saturate(1.4) url(#ldg-edge);
+  --glass-fill: rgba(12, 17, 25, .56);
+  --glass-fill-fly: rgba(12, 17, 25, .62);
+  --glass-edge: rgba(255, 255, 255, .16);
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, .15), inset 0 0 20px rgba(255, 255, 255, .045), 0 10px 26px rgba(0, 0, 0, .30);
+}
+
+/* 滤镜定义用的零尺寸容器：和图标 sprite 同一个套路，绝不能占位 */
+.ldg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+* { box-sizing: border-box; }
+
+/* hidden 属性必须胜过作者样式里的 display（否则 flex 类元素无法隐藏） */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", sans-serif;
+  color: var(--text);
+  font-size: 14px;
+  user-select: none;
+}
+
+body {
+  background: #05070b url("assets/bg.jpg") center / cover no-repeat;
+}
+
+/* ---------- 动态背景（视频壁纸） ----------
+   z-index:-1 的固定层：压在 body 的静态原画之上、所有内容之下。
+   关闭时 JS 会摘掉 src 并去掉 bg-live，露出来的就是上面那条初始背景。 */
+#bgVideo, #bgVeil {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  display: none;
+  pointer-events: none;
+}
+#bgVideo { object-fit: cover; }
+/* 薄遮罩：动态原画普遍比内置那张亮，压一点暗度才保得住毛玻璃卡片上的文字对比度 */
+#bgVeil { background: rgba(5, 7, 11, .38); }
+body.bg-live #bgVideo, body.bg-live #bgVeil { display: block; }
+
+/* ---------- 缩放手柄（无边框窗口） ---------- */
+.rz { position: fixed; z-index: 90; }
+.rz-n { top: 0; left: 8px; right: 8px; height: 5px; cursor: ns-resize; }
+.rz-s { bottom: 0; left: 8px; right: 8px; height: 5px; cursor: ns-resize; }
+.rz-w { left: 0; top: 8px; bottom: 8px; width: 5px; cursor: ew-resize; }
+.rz-e { right: 0; top: 8px; bottom: 8px; width: 5px; cursor: ew-resize; }
+.rz-nw { top: 0; left: 0; width: 8px; height: 8px; cursor: nwse-resize; }
+.rz-ne { top: 0; right: 0; width: 8px; height: 8px; cursor: nesw-resize; }
+.rz-sw { bottom: 0; left: 0; width: 8px; height: 8px; cursor: nesw-resize; }
+.rz-se { bottom: 0; right: 0; width: 8px; height: 8px; cursor: nwse-resize; }
+
+/* ---------- 标题栏 ---------- */
+#titlebar {
+  height: 62px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px 0 18px;
+  gap: 12px;
+  background: linear-gradient(180deg, rgba(5, 8, 12, .55), rgba(5, 8, 12, 0));
+  position: relative;
+  z-index: 20;
+}
+
+.tb-brand { display: flex; align-items: center; gap: 10px; }
+.tb-logo { width: 34px; height: 34px; }
+.tb-title { font-size: 18px; font-weight: 700; letter-spacing: .5px; }
+.tb-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.tb-drag { flex: 1; height: 100%; }
+
+.tb-actions { display: flex; align-items: center; gap: 6px; }
+
+/* 环境检查状态（2026-10-04 从顶栏挪到首页底部操作条，那里由 .bottom-bar 的 gap 控制间距，
+   原来的 margin-right 一并去掉）。nowrap：状态文案最长是「启动异常：…」，
+   换行会把这条 30px 的胶囊撑成两行、顶歪整条操作栏。 */
+.status-pill {
+  display: flex; align-items: center; gap: 7px;
+  height: 30px; padding: 0 12px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 15px;
+  font-size: 12px; color: #cfd8e3;
+  white-space: nowrap;
+}
+
+/* 顶栏的界面档位切换（第四十五批，业主口径：与下方环境检测那颗同大小）：高度、圆角、底板
+   都照 .status-pill 走，两颗图标并排，亮着的那颗 = 当前档（点它只重载本页，点另一颗才切档）。 */
+.ui-switch {
+  display: flex; align-items: center; gap: 2px;
+  height: 30px; padding: 0 4px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 15px;
+}
+.ui-switch-opt {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; padding: 0;
+  background: none; border: none; border-radius: 12px;
+  color: #cfd8e3; cursor: pointer;
+}
+.ui-switch-opt .ico { width: 15px; height: 15px; }
+.ui-switch-opt:hover { background: rgba(255, 255, 255, .08); }
+.ui-switch-opt.active {
+  background: linear-gradient(180deg, var(--amber-2), var(--amber-1));
+  color: #2a1c00;
+}
+
+.dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--muted);
+  box-shadow: 0 0 8px rgba(0, 0, 0, .4);
+  flex: none;
+}
+.dot-idle { background: #6b7482; }
+.dot-ok { background: var(--ok); box-shadow: 0 0 8px rgba(53, 208, 127, .8); }
+.dot-warn { background: var(--warn); box-shadow: 0 0 8px rgba(255, 197, 61, .8); }
+.dot-err { background: var(--err); box-shadow: 0 0 8px rgba(255, 92, 92, .8); }
+.dot-info { background: var(--accent); box-shadow: 0 0 8px rgba(55, 182, 255, .8); }
+.dot-pulse { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+.tb-btn {
+  width: 36px; height: 30px;
+  border: 1px solid transparent;
+  background: transparent;
+  /* 按需求改成纯白（原 #c7d1dd 是灰蓝，配上线条 SVG 后显得发暗）。
+     SVG 走 stroke="currentColor"，所以只需要动 color。 */
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  /* 图标版按钮：让 svg 在按钮里居中（原来是字符字形，靠基线对齐就够）。
+     取上游这版（inline-flex + padding:0）—— 三键改 SVG 这件事两边各自做了一遍，
+     上游那份是 sprite 图标体系下的一套，与 icons.js 的用法配套。 */
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+.tb-btn svg { display: block; }
+/* 最大化 / 还原 两个形态靠 .maxed class 切换（app.js:247 已从写 textContent 改成切 class，
+   否则第一次点最大化就会把整颗 SVG 冲成文本字形）。 */
+#btnMax .ic-restore { display: none; }
+#btnMax.maxed .ic-restore { display: block; }
+#btnMax.maxed .ic-max { display: none; }
+/* 动态背景开关：按需求不要底板，所以沿用 .tb-btn 的透明底与白色（同一排三个窗口键也是白，
+   它再灰一档会显得脏）。"开着"这一态改用主色点出来。
+   #bgToggleText 被 app.js 的 bgSync 写文案，元素必须留着，只是不显示。 */
+.tb-bg { width: 34px; }
+.tb-bg #bgToggleText { display: none; }
+.tb-bg.active { color: var(--accent); }
+.tb-bg.active:hover { color: #7bd0ff; }
+.tb-btn:hover { background: rgba(255, 255, 255, .09); }
+.tb-close:hover { background: rgba(232, 64, 64, .85); color: #fff; }
+
+/* ---------- 离线矢量图标（sprite 内嵌在 index.html 顶部）----------
+   用法：<svg class="ico"><use href="#i-名字"></use></svg>
+   统一 24×24 viewBox + 描边跟随 currentColor，所以换主题色、悬停变色都自动生效；
+   尺寸默认 1em（跟所在元素的字号走），需要固定尺寸时加 .ico-14 / .ico-18。 */
+.ico {
+  width: 1em; height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+  vertical-align: -0.14em;
+}
+.ico-14 { width: 14px; height: 14px; }
+.ico-18 { width: 18px; height: 18px; }
+/* sprite 本体不占位、不可见（不用 display:none —— 个别引擎会连 <use> 一起失效） */
+.svg-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+/* 图标版按钮：让 svg 在按钮里居中 */
+.btn-icon { display: inline-flex; align-items: center; justify-content: center; }
+/* 标题栏按钮里的图标比文字稍大一点才不显小 */
+.tb-btn .ico { width: 15px; height: 15px; }
+.btn-icon .ico { width: 15px; height: 15px; }
+/* 图标 + 文字的按钮：只给紧邻图标的那侧留白 */
+.btn .ico + span, .btn .ico + b { margin-left: 5px; }
+
+/* ---------- 主体布局 ---------- */
+#main {
+  display: flex;
+  height: calc(100% - 62px);
+  /* 底部留出声明条 + 上抬量的实际高度（见 :root --note-h / --lift），避免它压住「开始游戏」与日志面板 */
+  padding: 0 14px calc(var(--note-h) + var(--lift));
+  gap: 14px;
+}
+
+/* ---------- 悬浮工具面板（替代左侧导航） ---------- */
+/* 锚在右下、向上生长：容器用 bottom 定位，面板排在按钮之前，
+   所以条目变多时是往上撑，不会顶到底部声明条上。 */
+#toolslot {
+  position: fixed;
+  /* 与下方「开始游戏」那一整栏右对齐：操作条在 #main 内，右边界就是视口宽 - 14px 内边距，
+     所以这里取 14px 而不是原来的 22px。 */
+  right: 14px;
+  /* 贴在操作条上方：声明条 + 上抬量 + 操作条 64px + 10px 缝 = calc(--note-h + --lift + 74px)。
+     缝从原来的 2px 改成 10px，与操作条内部 gap:10px、以及「账号↔工具」那两处 10px 同宽，
+     整块右下的呼吸感才一致。64px = 主按钮 42 + 上下内边距 20 + 边框 2。
+     不跟着声明条走的话，声明条变高时日志被抬走而它不动。 */
+  bottom: calc(var(--note-h) + var(--lift) + 74px);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/* 底板改成与底部操作条那个容器一致：var(--panel-2) 深色底 + var(--panel-border) 细边
+   + var(--radius) 14px 圆角 + blur(18px)。
+   （上一轮按"和游戏模式一样"做的青色版已推翻——两颗青色胶囊挨在深色栏旁边太跳。）
+   定宽是为了 .account 的 right 能从 --toolbtn-w 反推而不是抄实测像素。 */
+#toolbtn {
+  width: var(--toolbtn-w);
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius);
+  background: var(--glass-fill, var(--panel-2));
+  border: 1px solid var(--glass-edge, var(--panel-border));
+  box-shadow: var(--glass-shadow, none);
+  color: #cfd8e3;
+  font: inherit;
+  /* font-weight 必须排在 font: inherit 之后：font 是简写属性，
+     会把 font-weight 一并重置成继承值，写在它前面就被顶掉。 */
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  backdrop-filter: var(--glass);
+  transition: background .15s, border-color .15s, color .15s;
+}
+#toolslot:hover #toolbtn, #toolslot:focus-within #toolbtn {
+  background: rgba(255, 255, 255, .13);
+  border-color: rgba(55, 182, 255, .55);
+  color: #fff;
+}
+
+/* 收起态必须是 display:none —— 这条是硬要求，不是风格问题。
+   悬停目标是父级 #toolslot，而 #toolfly 排在它的列里：只要面板"常驻占位"
+   （上一批为了做动画改成 visibility:hidden，就是常驻），#toolslot 的盒子就会从
+   44px 长到 ~555px，那块**看不见**的区域照样吃 :hover ⇒ 鼠标移到按钮上方空白处
+   菜单就自己弹开（用户报的这个 bug）。所以面板必须真的不占位。
+
+   动画照做：display 是离散属性，靠 transition-behavior:allow-discrete 让它参与过渡，
+   再配 @starting-style 提供"刚出现时"的起始值。
+   两条规则的 transition 故意不一样 —— 属性变化时用的是**变化后那个状态**上的 transition，于是：
+     打开走 #toolslot:hover 那条（不含 display）⇒ display 立刻翻成 flex，元素当场可渲染，
+       opacity/transform 从 @starting-style 的值淡入；
+     关闭走本条（含 display .18s allow-discrete）⇒ display 推迟到淡出走完才翻回 none，
+       所以收回去也有淡出，不会"啪"地消失。
+   条目始终在 DOM 里（app.js 按 .nav-item 统一绑切页，绑定时机早于任何 hover），
+   键盘路径也不变：Tab 到 #toolbtn 触发 :focus-within，面板展开后条目才可聚焦。 */
+#toolfly {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  width: 172px;
+  padding: 8px;
+  background: var(--glass-fill-fly, rgba(11, 17, 26, .93));
+  border: 1px solid var(--glass-edge, var(--panel-border));
+  border-radius: 14px;
+  backdrop-filter: var(--glass);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .5);
+  /* 面板从按钮向上长，窗口矮时最后几条（说明 / GM 工具）会被顶出屏幕外够不着。
+     实测 9 条共 383px，这里给一个随视口收缩的上限并允许内部滚动。 */
+  max-height: calc(100vh - 190px);
+  overflow-y: auto;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .18s ease, transform .18s ease, display .18s allow-discrete;
+}
+#toolslot:hover #toolfly, #toolslot:focus-within #toolfly {
+  display: flex;
+  opacity: 1;
+  transform: none;
+  transition: opacity .18s ease, transform .18s ease;
+}
+@starting-style {
+  #toolslot:hover #toolfly, #toolslot:focus-within #toolfly {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* 面板里的条目改成横排（原本是竖排卡片：图标在上、文字在下）。
+   .nav-bgbtn 已从面板移除（动态背景开关挪到顶栏），所以这里不再列它。 */
+#toolfly .nav-item {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+  font-size: 12px;
+}
+#toolfly .nav-item:hover {
+  background: rgba(24, 32, 44, .82);
+  border-color: var(--panel-border);
+}
+
+/* 快捷操作组（原首页「快捷」页签）。选择器必须带 #toolfly 两级：
+   `.btn` 定义在本文件 325 行、在这些规则之后，同特异性会把它盖回来
+   （.nav-update 就栽过一次）。 */
+#toolfly .toolfly-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+#toolfly .toolfly-label {
+  padding: 0 10px 2px;
+  color: #6d7b8c;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+#toolfly .toolfly-group .btn {
+  width: 100%;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 9px;
+  background: transparent;
+  border-color: transparent;
+  color: #c7d1dd;
+  font-size: 12px;
+  text-align: left;
+}
+#toolfly .toolfly-group .btn:hover:not(:disabled) {
+  background: rgba(24, 32, 44, .82);
+  border-color: var(--panel-border);
+  color: #fff;
+}
+
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 0 10px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  color: #c7d1dd;
+  font-size: 12px;
+  cursor: pointer;
+  backdrop-filter: var(--glass-item);
+  transition: border-color .15s, background .15s, transform .1s;
+}
+.nav-item:hover { background: rgba(24, 32, 44, .82); }
+.nav-item.active {
+  border-color: rgba(55, 182, 255, .65);
+  box-shadow: 0 0 0 1px rgba(55, 182, 255, .25), 0 0 18px rgba(55, 182, 255, .18) inset;
+  color: #fff;
+}
+/* 上游这条里带的 .nav-bgbtn 不收：动态背景开关已挪到顶栏做成 .tb-btn.tb-bg，
+   解完 index.html 后这个类在整个界面里不存在，留着就是死选择器。 */
+.nav-item:disabled { opacity: .45; cursor: not-allowed; }
+/* 导航图标位：字号定尺寸（.ico 是 1em），用 inline-flex 消掉行内基线的多余空隙 */
+.nav-ico { font-size: 18px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+.nav-ico svg { display: block; width: 1em; height: 1em; }
+
+/* 导航栏底部的「启动器版本 + 更新」（2026-09-23 从「设置」页挪出来）
+   与底部操作条的「开始游戏」用同一套黄色渐变（深色背景图下最显眼），
+   高度也按那条对齐（同为 64px，上下边界与右侧的账号/开始游戏整条齐平）。
+   有更新时：角标亮红 + 出现「更新」按钮 + 一圈红描边。 */
+/* 顶栏里的启动器版本与更新：与 .status-pill 同高的琥珀色一条（原为左导航底部的竖排卡片）。 */
+.nav-foot {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 11px;
+  background: linear-gradient(180deg, var(--amber-2), var(--amber-1));
+  border: 1px solid rgba(0, 0, 0, .2);
+  border-radius: 15px;
+  box-shadow: 0 2px 12px rgba(245, 166, 35, .28);
+  /* nowrap + 不许被压缩：顶栏是 flex，一旦允许 shrink，「启动器」和「更新」
+     会被挤成一列一字竖排（实测有更新时 136px 宽就触发）。 */
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.nav-foot.has-update {
+  box-shadow: 0 0 0 2px rgba(255, 92, 92, .9), 0 4px 18px rgba(245, 166, 35, .35);
+}
+.nav-foot-label { color: rgba(42, 28, 0, .72); font-size: 11px; letter-spacing: 1px; }
+.nav-ver {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #2a1c00;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  cursor: pointer;
+}
+/* 自更新下载中：版本号底下画一条 2px 细进度线（--nav-p = 0~100）。
+   顶栏这一条只有 30px 高、整条进度条塞不下，所以百分比写在文字里（"下载 42%"），
+   条形就做成这条细线；拿不到总量时换循环扫条（.nav-ver-sweep），避免看着像卡死。 */
+.nav-ver.nav-ver-busy { cursor: progress; }
+.nav-ver.nav-ver-busy::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: -3px; height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(calc(var(--nav-p, 0) / 100));
+  transform-origin: left center;
+  transition: transform .18s linear;
+}
+.nav-ver.nav-ver-sweep::after {
+  transform: none;
+  animation: nav-sweep 1.15s ease-in-out infinite;
+}
+@keyframes nav-sweep {
+  0% { transform: translateX(-110%) scaleX(.32); }
+  100% { transform: translateX(320%) scaleX(.32); }
+}
+.nav-ver:hover { color: #000; text-decoration: underline; }
+.nav-ver:disabled { cursor: progress; }
+.nav-badge {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--err);
+  border: 1px solid rgba(255, 255, 255, .9);
+  box-shadow: 0 0 7px rgba(255, 92, 92, .9);
+}
+/* 琥珀条里的「更新」按钮：深色底 + 暖色字，压得住黄色底。
+   必须写成 .btn.nav-update：`.btn` / `.btn-mini` 定义在本规则之后且特异性相同，
+   单类名会被它们把 background/color/height 整个盖掉（静默失效，按钮平时是 hidden 才没人发现）。 */
+.btn.nav-update {
+  width: auto;
+  height: 20px;
+  padding: 0 9px;
+  background: rgba(42, 28, 0, .82);
+  border: none;
+  color: #ffe9c2;
+}
+.btn.nav-update:hover { background: rgba(42, 28, 0, .95); }
+
+/* 内容区 */
+#content { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+.page { display: none; flex-direction: column; gap: 14px; flex: 1; min-height: 0; }
+.page.active { display: flex; }
+
+/* 卡片在空间不足时收缩并内部滚动，避免把底部操作条挤到贴边 */
+.page .card { min-height: 0; overflow-y: auto; flex: 0 1 auto; }
+.page .card::-webkit-scrollbar { width: 8px; }
+.page .card::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .14); border-radius: 4px; }
+
+/* 首页那张卡片装着「状态」与「更新」两个页签，收窄到与左下日志面板同宽。
+   两者左边界都取自 #main 的 14px 内边距，所以宽度一致就自动对齐；
+   右侧空出来只显背景原画与动态视频。其他页面的卡片不受影响。
+   max-height 50vh（业主 2026-10-06：更新与运行日志这两块底板都不要超过半个窗口）：
+   卡片本身已经是 .page .card 那条里的可滚动容器，所以超出部分自己滚，不会顶出窗口。 */
+#page-home > .card { width: var(--rail); max-height: 50vh; }
+
+/* 其余页面的卡片：原本 .page 是列向 flex、align-items 默认 stretch，所以卡片一律撑满整宽，
+   右侧大片空白。改成随内容收缩并封顶半宽（fit-content 定"贴内容"，max-width 兜住不超一半）。
+   排除 #page-gm —— 它由 gm.css 接管自己的网格布局，套这条会打乱 GM 工作区。
+   排除 #page-mods —— 那一页的两张卡由下面 #page-mods 那一段统一管宽高（两张必须一样大）。
+   注意 `:not(#…)` 会把 id 也算进特异度，所以这一条是（2 个 id + 2 个类）：
+   想覆盖它必须**排除页面**（本节的做法）或写到同样特异度再靠后置，不能只写 `#page-mods > .card`。 */
+.page:not(#page-home):not(#page-gm):not(#page-mods) > .card {
+  width: fit-content;
+  max-width: 50%;
+  /* fit-content 下长路径一类的 mono 值会把盒子顶宽，这里允许它换行而不是撑破上限 */
+  overflow-wrap: anywhere;
+}
+
+/* 卡片 */
+.card {
+  background: var(--glass-fill, var(--panel));
+  border: 1px solid var(--glass-edge, var(--panel-border));
+  border-radius: var(--radius);
+  backdrop-filter: var(--glass);
+  box-shadow: var(--glass-shadow, none);
+  padding: 14px 18px;
+  animation: fadein .12s ease-out;
+}
+@keyframes fadein { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+.card h2 { margin: 4px 0 10px; font-size: 15px; font-weight: 600; }
+
+/* 危险动作卡片（存档页的「删除存档」）：左侧一条红边 + 淡红底。
+   整个界面上只有"会毁掉玩家数据"的操作配用这个色，用多了就不显眼了。 */
+.card-danger { margin-top: 12px; border-color: rgba(255, 92, 92, .32); border-left: 3px solid var(--err); }
+.card-danger h2 { color: #ffb4b4; }
+
+/* 删除的就地二次确认面板：不弹浏览器 confirm（那个在 WebView2 里样式不可控、
+   也没有位置感），就地展开把"会发生什么"逐条写清，再要求手动输入两个字。 */
+.save-confirm {
+  margin-top: 12px; padding: 12px 14px;
+  border: 1px solid rgba(255, 92, 92, .38);
+  border-radius: var(--radius);
+  background: rgba(255, 92, 92, .07);
+}
+.save-confirm-title { font-weight: 600; color: #ffb4b4; margin-bottom: 6px; }
+.save-confirm-label { display: block; margin: 10px 0 6px; font-size: 12px; color: var(--muted); }
+.save-confirm input[type="text"] {
+  width: 140px; height: 30px; padding: 0 10px;
+  background: rgba(8, 13, 20, .72);
+  border: 1px solid var(--panel-border); border-radius: 7px;
+  color: #f2f6fb; font-size: 13px; font-family: inherit;
+}
+.save-confirm input[type="text"]:focus { outline: 1px solid var(--err); }
+
+/* 动作结果行（存档页的「导出成功 / 导入失败」那一句）：贴在动作按钮下面，
+   比 toast 多留一会儿，方便玩家照着路径去找文件。 */
+.result {
+  margin-top: 10px; padding: 9px 12px;
+  border: 1px solid var(--panel-border); border-left: 3px solid var(--accent);
+  border-radius: 7px;
+  background: rgba(12, 18, 26, .6);
+  font-size: 12px; line-height: 1.6; word-break: break-all;
+}
+.result.ok { border-left-color: var(--ok); }
+.result.warn { border-left-color: var(--warn); }
+.result.error { border-left-color: var(--err); color: #ffd0d0; }
+
+.card-tabs { display: flex; gap: 18px; border-bottom: 1px solid rgba(255, 255, 255, .07); margin: -4px 0 10px; }
+.tab {
+  background: none; border: none; color: var(--muted);
+  padding: 8px 2px 9px; font-size: 13px; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab.active { color: #fff; border-bottom-color: var(--accent); }
+
+/* 状态区折叠箭头：贴在页签行右端，与右侧日志面板那个 ▼ 同款语义（margin-left:auto 推到行末） */
+.tab-fold {
+  margin-left: auto;
+  align-self: center;
+  width: 28px; height: 25px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 7px;
+  color: #cfd8e3;
+  font-size: 11px;
+  cursor: pointer;
+}
+.tab-fold:hover { background: rgba(24, 32, 44, .92); }
+
+/* 收起状态区后只剩这一行结论 */
+.status-summary {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 2px 4px;
+  color: #f2f6fb;
+}
+/* 选择器从 .btn-link 改成 .btn：那个链接式按钮已换成 .btn.btn-mini 的「详情」。
+   留着旧选择器会让它丢掉 margin-left:auto，不再贴右。 */
+.status-summary .btn { margin-left: auto; flex: none; white-space: nowrap; }
+
+/* 折叠动画走 `#logpanel` 那条老路：动的是盒子（.18s ease），内容该没就瞬时没。
+   这里盒子高度是 auto，没法直接 transition height，所以用 grid-template-rows
+   在 1fr ↔ 0fr 之间过渡（Chromium 107+ 支持；WebView2 是常青通道，够用）。 */
+#statusDetail {
+  display: grid; grid-template-rows: 1fr;
+  transition: grid-template-rows .18s ease;
+}
+#statusDetail > .fold-inner { overflow: hidden; min-height: 0; }
+#statusDetail.folded { grid-template-rows: 0fr; }
+
+.tabpane { display: none; }
+.tabpane.active { display: block; }
+
+/* 状态行 */
+.row { display: flex; align-items: center; gap: 10px; padding: 9px 2px; }
+/* width:170 还不够 —— .row 是 flex 容器，.row-name 默认 flex-shrink:1，值一长
+   （设置页「启动器更新源」那串 URL 会折行）就把标签列压成 137px，于是这一行的值列起点、
+   下拉、按钮整体比邻行偏左（业主 2026-10-06 指出的"这条没对齐"）。
+   与 .row-btn / .guide-step .btn 那两条注释是同一根因，同一味药。 */
+.row-name { width: 170px; flex: none; color: #cbd5e1; }
+.row-val { color: #f2f6fb; }
+/* 带控件的行（行内有下拉或行末按钮）：值列吃掉剩余宽度并单行省略，控件的右边界才成一条线。
+   只管这些行，是因为纯文字行（如开发者页「服务端程序」那句说明）本来就该折行读全；
+   被省略的全文都挂在 title 上（见 app.js 的 setRow / 设置页那几处赋值）。 */
+.row:has(.row-sel) .row-val,
+.row:has(.row-btn) .row-val {
+  flex: 1 1 auto; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.row-val.mono, .mono { font-family: Consolas, "Courier New", "Microsoft YaHei UI", "Microsoft YaHei", monospace; font-size: 12px; }
+/* 状态区/设置页的值列里，.mono 与旁边的 .row-val 会差两号（14 对 12），
+   同一列上下读起来就不齐。让 mono 值继承同语境字号，只保留等宽字形。 */
+.row-val.mono { font-size: inherit; }
+.dim { color: var(--muted); font-size: 12px; }
+
+.row-actions { display: flex; gap: 10px; margin-top: 12px; align-items: center; }
+.row-actions.wrap { flex-wrap: wrap; }
+.mod-list { display: flex; flex-direction: column; gap: 8px; }
+.mod-option { display: flex; align-items: center; gap: 12px; min-height: 44px; width: fit-content; cursor: pointer; }
+.mod-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--amber-1); cursor: pointer; }
+.mod-option:has(input:disabled) { opacity: .6; cursor: default; }
+.mod-option input:disabled { cursor: default; }
+.mod-option input:focus-visible { outline: 2px solid var(--amber-1); outline-offset: 4px; }
+/* 推到所在行的行末（例：更新页的「重新编译服务端」）。
+   同 .row-btn：不锁 flex 与空白的行末按钮会被长值挤到折行。 */
+.row-end { margin-left: auto; flex: none; white-space: nowrap; }
+.hint { color: var(--muted); font-size: 12px; }
+
+/* 「更新」页比「状态」页高，挤在 --rail 宽的左轨里会来回折行、把卡片顶出滚动条。
+   2026-10-06 按用户要求对元素重新排布（容器本身不变：还是左轨里的一张卡片 + 两个页签）：
+   · 两条长说明（updateChannelHint / updateDevHint 这类 .hint）各自独占整行、字号收小；
+   · 行间距略微收紧。按钮行不受影响，仍按 .wrap 换行、行末按钮用 .row-end 贴右。 */
+#tab-update .row-actions { row-gap: 6px; }
+#tab-update .row-actions > .hint {
+  flex: 1 1 100%;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+/* 例外：「开发者功能」那行现在要和红色的「强制编译服务端」同排（业主 2026-10-06 第二轮），
+   所以它按内容宽排、不独占整行 —— 否则按钮会被挤到下一行行首。 */
+#tab-update .row-actions > .hint.hint-inline { flex: 0 1 auto; }
+.body-text { line-height: 1.7; margin: 6px 0; }
+
+/* 按钮 */
+.btn {
+  height: 32px; padding: 0 14px;
+  background: rgba(255, 255, 255, .07);
+  color: #e6edf5;
+  border: 1px solid var(--panel-border);
+  border-radius: 9px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.btn:hover { background: rgba(255, 255, 255, .13); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-mini { height: 24px; padding: 0 10px; font-size: 12px; }
+.btn-icon { min-width: 40px; }
+/* 底部「游戏模式」按钮（.btn-mode）已随按钮一起删除（业主 2026-10-06「移除游戏模式」）：
+   它是开发者页「游戏模式」那一行的重复入口，删掉后底部条只剩 状态胶囊 / GM 工具 / 开始游戏。 */
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0 2px;
+  text-decoration: underline dotted;
+}
+.btn-link:hover { color: #7cc8ff; }
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--amber-2), var(--amber-1));
+  border: none;
+  color: #2a1c00;
+  font-weight: 700;
+  height: 42px;
+  padding: 0 34px;
+  font-size: 15px;
+  border-radius: 11px;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 18px rgba(245, 166, 35, .35);
+}
+.btn-primary:hover { background: linear-gradient(180deg, var(--amber-2), var(--amber-1)); filter: brightness(1.06); }
+.btn-primary:disabled { filter: grayscale(.6) brightness(.8); box-shadow: none; }
+.btn-primary.btn-stop {
+  background: linear-gradient(180deg, #ff9a9a, #e05a5a);
+  color: #2a0000;
+  box-shadow: 0 4px 18px rgba(224, 90, 90, .35);
+}
+.btn-primary.btn-stop:hover { background: linear-gradient(180deg, #ff9a9a, #e05a5a); }
+
+/* ---------- 「开始游戏」上的更新红点 ---------- */
+/* 2026-10-04 按用户要求撤掉了两样东西：悬停「开始游戏」时挤出的「检查更新」胶囊，
+   以及更新期间与主按钮互换的那根绿色进度条（连带 .startslot 包装层）。
+   服务端更新入口回到「状态」卡的「更新」页签，所以这里只剩主按钮一个提醒点。
+   红点必须是伪元素而不是子节点：applyGamePhase 用 btnStart.textContent 改文案
+   （开始游戏 / 启动中… / 停止游戏），塞进去的 span 第一次阶段变化就被抹掉。 */
+#btnStart { position: relative; }   /* 红点伪元素的定位上下文 */
+#btnStart.has-update::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #e5484d;
+  border: 1px solid rgba(255, 255, 255, .9);
+  box-shadow: 0 0 7px rgba(229, 72, 77, .9);
+  pointer-events: none;
+}
+
+/* 底部操作条 */
+.bottom-bar {
+  margin-top: auto;
+  /* 抬到 body 级 z-index:30 的 #toolslot / .account 之上。
+     原先这条是为了托住悬停浮出的「检查更新」，让它盖过「工具」按钮；现在那颗按钮
+     改成进队列、与「工具」不在同一纵向区间，不再需要压层，这里只作为窗口被压矮到
+     两块贴上时的兜底保留。 */
+  position: relative;
+  z-index: 31;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--glass-fill, var(--panel-2));
+  border: 1px solid var(--glass-edge, var(--panel-border));
+  border-radius: var(--radius);
+  backdrop-filter: var(--glass);
+  box-shadow: var(--glass-shadow, none);
+  padding: 10px 14px;
+  /* 靠右收窄（2026-10-04）：#page-home 是列向 flex，align-self:flex-end 把它推到右边，
+     width:auto 收成内容宽。左侧整块让给 #logpanel——两者底边同为 bottom:52，
+     于是变成左右并排而不是叠在一起。原来靠 .spacer 撑满整行来右对齐。 */
+  align-self: flex-end;
+  width: auto;
+}
+/* 账号指示：与「工具」按钮同一行、同款深色底板（同 #toolbtn，也与底部操作条容器一致）。
+   right 从 --toolbtn-w 反推：14（工具按钮右界）+ 工具按钮宽 + 10 间距。
+   bottom 与 #toolslot 同值、同高 44px、同 14px 圆角，所以两者看起来是同一组控件。
+   它仍是 #page-home 的子节点，因此随首页显隐，不会浮到其他页面上。
+   （中间一度与 GM 包成 .home-chips 一行，好让 GM 落在账号左边；GM 搬进操作条后
+   那层包装只剩一个孩子，已撤掉，这里恢复自己 fixed 定位。） */
+.account {
+  position: fixed;
+  right: calc(14px + var(--toolbtn-w) + 10px);
+  bottom: calc(var(--note-h) + var(--lift) + 74px);
+  z-index: 30;
+  display: flex; align-items: center;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: var(--radius);
+  background: var(--glass-fill, var(--panel-2));
+  border: 1px solid var(--glass-edge, var(--panel-border));
+  backdrop-filter: var(--glass);
+  box-shadow: var(--glass-shadow, none);
+  font-size: 12px;
+  color: #cfd8e3;
+  white-space: nowrap;
+}
+/* 账号下拉：住在 .account 那格底板里，所以比设置页的 .row-sel 收一档 —— 上下各留 2px，
+   不把 44px 的格子撑高（格子高度是跟「工具」按钮对齐写死的）。
+   max-width 按账号名上限 32 字符截断并走省略号：这一格是 right 定位、宽度随内容，
+   名字越长越往左撑，撑过头就压到首页卡片上。
+   font-weight 700 接住原来 <b id="chipAccount"> 的强调 —— 名字是这一格唯一要读的东西；
+   下拉展开后的选项列表回到 400，否则整屏都是粗体。
+   font-family 要显式 inherit：表单控件不继承页面字体栈，不写就会和格子里的汉字不同字。 */
+.account-sel {
+  padding: 2px 4px;
+  border: 1px solid rgba(148, 163, 184, .35);
+  border-radius: 6px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  max-width: 168px;
+  text-overflow: ellipsis;
+}
+.account-sel:focus { outline: 1px solid var(--accent); }
+.account-sel option { background: #0f172a; color: #e2e8f0; font-weight: 400; }
+/* GM 工具：样式照「开始游戏」（.btn-primary：无框、700 粗、15px、11px 圆角、
+   浅→深渐变、同色辉光、42px 高），只把琥珀换成蓝色。
+   高度**不覆盖**：它现在在 .bottom-bar 里，操作条总高 = 最高子项 + 上下内边距 20 + 边框 2，
+   主按钮 42 就是那个最高项；这里写 44 会把整条抬到 66px，而 #toolslot / .account 的
+   bottom 是按"操作条 64px"反推的，会一起错位。
+   左右内边距取 22px 而不是主按钮的 34px —— 那 34px 是给「开始游戏」四个汉字配的，
+   「GM 工具」四字号一样但整串更窄，照抄只会让操作条白白变宽。（文字左边那列图标
+   已按业主 2026-10-06 指示删掉，这里的内边距与 gap 数值不动：删图标只让按钮变窄，
+   操作条总高仍由 42px 的主按钮决定，#toolslot / .account 的反推几何不受影响。） */
+.btn-gm {
+  padding: 0 22px;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: linear-gradient(180deg, var(--blue-2), var(--blue-1));
+  color: #04222e;
+  box-shadow: 0 4px 18px rgba(55, 182, 255, .35);
+}
+.btn-gm:hover:not(:disabled) {
+  background: linear-gradient(180deg, #9ce6ff, #4fc3ff);
+}
+.btn-gm:active:not(:disabled) { transform: translateY(1px); }
+
+/* 「首页」返回按钮：只在非首页页面出现。
+   位置与尺寸完全照「工具」按钮那一格：right 从 --toolbtn-w 反推（与 .account 同一个式子）、
+   bottom 与 #toolslot / .account 同值、同 72×44、同 14px 圆角、同深色底板。
+   首页时那一格站的是账号指示，而 .account 在 #page-home 内、离开首页就藏起来 ⇒
+   两处共用同一个槽按页面换内容，不会打架。
+   字体三行的顺序有讲究：font 是简写属性会把 font-weight 一并重置，所以 font-weight
+   必须排在它后面（同 #toolbtn，那边的注释留了实测记录）。 */
+.btn-homeback {
+  position: fixed;
+  right: calc(14px + var(--toolbtn-w) + 10px);
+  bottom: calc(var(--note-h) + var(--lift) + 74px);
+  z-index: 30;
+  width: var(--toolbtn-w);
+  height: 44px;
+  padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius);
+  background: var(--glass-fill, var(--panel-2));
+  border: 1px solid var(--glass-edge, var(--panel-border));
+  color: #cfd8e3;
+  font: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  backdrop-filter: var(--glass);
+  box-shadow: var(--glass-shadow, none);
+}
+.btn-homeback:hover {
+  background: rgba(255, 255, 255, .13);
+  border-color: rgba(55, 182, 255, .55);
+  color: #fff;
+}
+/* 显隐判据用 :has() 而不是 JS：切页逻辑（activateNav）不需要知道有这个按钮，
+   也就不会出现"某条切页路径忘了摘它"的漏网。 */
+#main:has(#page-home.active) #btnHomeBack { display: none; }
+
+/* GM 独立窗口（`index.html#gm`，标记由 gm-window.js 打在 <html> 上，与 gm.css 里
+   `.gm-window body` / `.gm-window #gmGlobalTarget` 那两条同一个约定）。
+   这几样都挂在 .page 之外，所以 gm-window.js 只点亮 #page-gm 收不住它们：
+   顶栏那条琥珀色的启动器版本/更新胶囊、右下角的「工具」悬浮入口、「首页」返回按钮，
+   以及动态背景开关。在 GM 窗口里它们都没有对应物 —— 这里没有别的页面可回，启动器自身的
+   更新也不该在这里点；独立管理窗口的底是 gm.css 给的纯色 #111820，主窗口那张原画/视频
+   在这里根本不显示，所以那颗开关是个按了没反应的按钮
+   （业主 2026-10-06：「GM 启动器内错误的出现了该按钮」「动态背景按钮也错误的进入GM工具页面了」）。 */
+.gm-window #navFoot,
+.gm-window #toolslot,
+.gm-window #btnBgToggle,
+.gm-window #btnHomeBack { display: none; }
+.spacer { flex: 1; }
+
+/* 「强制编译服务端」的后台进度横幅（业主 2026-10-06：「编译组件下载进度不要遮罩，当道这俩框中间」）。
+   位置 = 首页卡片与运行日志面板之间的空当：卡片与日志在纵向上没有真正的空白（卡片可以长到
+   #main 的整高），所以横幅走 fixed 定位，几何与日志面板同一套反推值，保证"夹在两者之间"：
+     left   14px                     —— 与卡片 / 日志的左边界对齐（三者都从 #main 的 14px 内边距起算）
+     width  var(--rail)              —— 与卡片 / 日志同宽，右边界也对齐
+     bottom calc(--note-h + --lift + 268px)
+                                     —— 日志面板上边（bottom = --note-h + --lift，高 260）再抬 8px 缝
+   z-index 26：盖过日志面板（25，实心底板），又不越过右下「工具」按钮 / 账号（30）。
+   pointer-events:none：只读，不抢任何点击 —— 玩家随时能点「开始游戏」，下载在后台继续。
+   hidden 时 [hidden]{display:none !important} 让它整条不存在，布局与从前完全一样。 */
+.bgtask-banner {
+  position: fixed;
+  left: 14px;
+  bottom: calc(var(--note-h) + var(--lift) + 268px);
+  width: var(--rail);
+  z-index: 26;
+  pointer-events: none;
+  padding: 7px 12px;
+  background: rgba(55, 182, 255, .10);
+  border: 1px solid rgba(55, 182, 255, .34);
+  border-radius: 9px;
+  color: #cdeaff;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* 日志面板（2026-10-04：从主体右侧搬到左下固定层）。
+   默认收起成一条 36px 的横条，出现 error 级日志时由 app.js 摘掉 .folded 自动展开。
+   用 bottom 定位 + 动 height，所以展开是朝上长的（对应用户要的"向上单开"）。 */
+#logpanel {
+  position: fixed;
+  left: 14px;
+  bottom: calc(var(--note-h) + var(--lift));
+  z-index: 25;
+  /* 窄窗口下不让它伸到右下的「工具」按钮底下 */
+  width: var(--rail);
+  height: 260px;
+  /* 业主 2026-10-06：与首页卡片一样不超过半个窗口。窗口矮到 520px 以下时这里会真的生效，
+     上面那条 268px 的横幅推导（见 .rebuild-banner 的 bottom）就会多出一点缝 —— 只是留白，
+     不会重叠，所以不为它再加一条反推。 */
+  max-height: 50vh;
+  display: flex; flex-direction: column;
+  background: var(--glass-fill, var(--panel-2));
+  border: 1px solid var(--glass-edge, var(--panel-border));
+  border-radius: var(--radius);
+  backdrop-filter: var(--glass);
+  box-shadow: var(--glass-shadow, none);
+  overflow: hidden;
+  transition: height .18s ease;
+}
+#logpanel.folded { height: 36px; }
+/* 折叠时只藏正文与两个操作按钮，「运行日志」标题留着——
+   一条 36px 的空横栏只剩个箭头没人知道是什么。 */
+#logpanel.folded .log-body { display: none; }
+#logpanel.folded .log-actions .btn:not(#btnLogFold) { display: none; }
+#logpanel.folded .log-head { border-bottom-color: transparent; }
+/* 折叠态对齐修正：.log-head 自然高 43px（9 + 24 按钮 + 9），而折叠后整条只有 36px，
+   #logpanel 又是 overflow:hidden —— 底部被裁 8px，标题与箭头整行下坠
+   （实测按钮上方留白 10px、下方只剩 2px），看着就是"图标和文字上下不对齐"。
+   锁到 34px = 36 减上下各 1px 边框（全局 box-sizing:border-box）。 */
+#logpanel.folded .log-head { height: 34px; padding: 0 12px; }
+/* 与状态区那个折叠按钮（.tab-fold：28x25 / radius 7 / 字号 11 / var(--panel) 底）视觉统一。
+   单 id 选择器特异性 1-0-0，稳过 .btn / .btn-mini（0-1-0）。
+   箭头字形仍各按方向语义：日志向上展开故折叠态用 ▲，状态区向下折叠用 ▶。 */
+#logpanel #btnLogFold {
+  width: 28px;
+  height: 25px;
+  padding: 0;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 7px;
+  color: #cfd8e3;
+  font-size: 11px;
+}
+
+.log-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, .07);
+  font-size: 13px;
+}
+.log-actions { display: flex; gap: 6px; }
+
+.log-body {
+  flex: 1;
+  margin: 0;
+  padding: 10px 12px;
+  overflow-y: auto;
+  font-family: Consolas, "Courier New", "Microsoft YaHei UI", "Microsoft YaHei", monospace;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #c9d4e0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: text;
+}
+.log-body .ln-info { color: #c9d4e0; }
+.log-body .ln-ok { color: #7fe0ac; }
+.log-body .ln-warn { color: #ffd479; }
+.log-body .ln-error { color: #ff8f8f; }
+.log-body .ln-time { color: #6f7b8c; }
+/* 日志行里的"就地修复"按钮：与错误文字排在同一行（后端在日志上挂了 action 时出现） */
+.log-body .ln-action { margin-left: 8px; vertical-align: middle; }
+/* 滚动条 */
+.log-body::-webkit-scrollbar { width: 8px; }
+.log-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .14); border-radius: 4px; }
+.log-body::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .25); }
+
+/* 全局自定义滚动条：上面的规则只覆盖了少数元素，GM 页的表格区/左树等仍是
+   WebView2 的原生滚动条（带箭头、浅色，在深色界面上很突兀）。
+   注意：不要同时写 scrollbar-width / scrollbar-color —— Chromium 一旦认了那两个属性，
+   就会忽略 ::-webkit-scrollbar，反而退回原生样式。
+   滑块用「透明边框 + background-clip: content-box」做内缩，这样在任何底色上都好看。 */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-button { display: none; height: 0; }
+::-webkit-scrollbar-thumb { background: #33445a; border: 2px solid transparent; border-radius: 999px; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #445a75; }
+::-webkit-scrollbar-thumb:active { background: #52708f; }
+
+/* 提示条。原来 bottom:28px，而底部声明条自己就占掉约 50px（--note-h 是实测值），
+   所以整条压在作者声明上面。现在抬到**整个底部簇之上**，而不是只抬过声明条：
+   .bottom-bar 是右锚定、宽度随内容变（窄窗时左缘会一路伸到中间），只越过声明条的话
+   提示条会改成压住操作条，等于换了个重叠对象。
+   128px = 74（声明条之上到账号那一行底边的距离，见 #toolslot）+ 44（该行控件高）
+           + 10（再留一条同宽的缝）。
+   水平方向不用管：提示条居中且窄，日志面板在 x 14..474，操作条在右侧，都碰不到。 */
+.toast {
+  position: fixed;
+  left: 50%; bottom: calc(var(--note-h) + var(--lift) + 128px);
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(18, 24, 34, .95);
+  border: 1px solid var(--panel-border);
+  border-left: 3px solid var(--accent);
+  padding: 10px 16px;
+  border-radius: 9px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s, transform .18s;
+  z-index: 100;
+  max-width: 70%;
+}
+.toast.show { opacity: 1; transform: translateX(-50%); }
+
+/* ---------- 体检明细列表 ---------- */
+.check-list {
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, .07);
+  padding-top: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+.check-list::-webkit-scrollbar { width: 8px; }
+.check-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .14); border-radius: 4px; }
+
+.check-item {
+  display: grid;
+  grid-template-columns: 14px 150px 1fr auto;
+  gap: 4px 8px;
+  align-items: baseline;
+  padding: 6px 6px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.check-item.has-detail { cursor: pointer; }
+.check-item:hover { background: rgba(255, 255, 255, .045); }
+.check-item.open { background: rgba(255, 255, 255, .06); }
+.ci-action { align-self: center; }
+
+.ci-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  align-self: center;
+  margin-top: 1px;
+}
+.ci-dot.ok { background: var(--ok); box-shadow: 0 0 6px rgba(53, 208, 127, .7); }
+.ci-dot.warn { background: var(--warn); box-shadow: 0 0 6px rgba(255, 197, 61, .7); }
+.ci-dot.error { background: var(--err); box-shadow: 0 0 6px rgba(255, 92, 92, .7); }
+.ci-dot.info { background: #6b7482; }
+
+.ci-name { color: #cbd5e1; }
+.ci-value {
+  color: #eef3f9;
+  font-family: Consolas, "Courier New", "Microsoft YaHei UI", "Microsoft YaHei", monospace;
+  font-size: 12px;
+  word-break: break-all;
+}
+.ci-detail {
+  grid-column: 2 / 5;
+  display: none;
+  margin-top: 5px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, .28);
+  border-radius: 7px;
+  color: #a9b4c2;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.check-item.open .ci-detail { display: block; }
+
+/* ---------- 环境引导（M2） ---------- */
+.guide {
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, .07);
+  padding-top: 10px;
+}
+.guide-title { font-size: 13px; color: var(--warn); margin-bottom: 6px; }
+.guide-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+  font-size: 12px;
+}
+.guide-idx {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 197, 61, .18);
+  color: var(--warn);
+  font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  flex: none;
+}
+.guide-text { color: #d5dde7; }
+/* flex: none + nowrap —— 按钮被压窄才是文字折行的根因（.btn 默认 flex-shrink:1 且没锁空白），
+   只把标签改短属于治标：以后再有长标签照样折行。 */
+.guide-step .btn { margin-left: auto; flex: none; white-space: nowrap; }
+
+/* 与 .guide-step .btn 同一根因：.btn 默认 flex-shrink:1 且没锁空白，
+   所以行内长值（如设置页那串日志目录绝对路径）会把按钮挤窄，
+   连「应用」「打开」两字都折成两行。补 flex:none + nowrap 一次治本。 */
+.row-btn { margin-left: auto; flex: none; white-space: nowrap; }
+/* 一行里**所有**按钮都不许被挤窄，不只是带 .row-btn 的那颗。
+   实测漏网的例子：存档页「存档位置」一行有「复制路径」(.row-btn) 与「打开目录」(只有 .btn-mini)，
+   长路径把后者压成两行（"打开目 / 录"）—— 业主 2026-10-06 报的"打开目录按钮窜行"。
+   .row-btn 的 margin-left:auto 只该有一份（推最右那颗），所以这里只补收缩与空白两条。 */
+.row > .btn { flex: none; white-space: nowrap; }
+
+/* 设置页：更新源下拉（与行内按钮同排） */
+.row-sel {
+  margin-left: 10px;
+  padding: 3px 6px;
+  border: 1px solid rgba(148, 163, 184, .35);
+  border-radius: 6px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 12px;
+  max-width: 240px;
+}
+.row-sel:focus { outline: 1px solid var(--accent); }
+.row-sel option { background: #0f172a; color: #e2e8f0; }
+
+/* 更新页的「版本」下拉：条目是"版本 · 短 SHA · 提交标题 · 时间"，给它更宽的位置并允许截断 */
+.sel-update-version { max-width: min(560px, 52vw); text-overflow: ellipsis; }
+
+/* 更新页/其它页的行内复选框（跟随最新、MOD 选项用的是另一套 .mod-option） */
+.chk-inline {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: #cbd5e1; font-size: 13px; cursor: pointer; user-select: none;
+  padding: 0 2px;
+}
+.chk-inline input { width: 15px; height: 15px; margin: 0; accent-color: var(--amber-1); cursor: pointer; }
+.chk-inline:has(input:disabled) { opacity: .6; cursor: default; }
+
+/* 设置页：可操作的更新按钮（与模态框内的琥珀色按钮同款） */
+.btn.btn-amber {
+  background: linear-gradient(180deg, var(--amber-2), var(--amber-1));
+  border: none;
+  color: #2a1c00;
+  font-weight: 600;
+}
+.btn.btn-amber:hover { filter: brightness(1.06); }
+
+/* ---------- 更新页第一排（业主 2026-10-06 重排）----------
+   .btn-pill 只给几何：高度/内边距/字号/无边框全部照抄顶栏「更新」那颗（.btn.nav-update），
+   配色一律交给 .btn-amber / .btn-blue / .btn-red / .btn-soft，所以这里**不写 background**，
+   否则和 .btn.btn-amber 同特异性、按文件先后互相盖掉。
+   必须写成 .btn.btn-pill：`.btn` 定义在本规则之前但只有单类名，写单类会被它的
+   height/padding/border 盖掉（同 .btn.nav-update 那条注释里踩过的坑）。 */
+.btn.btn-pill {
+  height: 20px;
+  padding: 0 9px;
+  font-size: 12px;
+  border: none;
+  border-radius: 7px;
+  font-weight: 600;
+}
+/* 蓝色 = 只动服务端源码/程序的动作，取「GM 工具」那颗的同一对蓝（--blue-2 → --blue-1）。 */
+.btn.btn-blue {
+  background: linear-gradient(180deg, var(--blue-2), var(--blue-1));
+  color: #04222e;
+}
+.btn.btn-blue:hover:not(:disabled) { filter: brightness(1.06); }
+/* 红色 = 会覆盖盘上服务端程序的动作，取「停止游戏」那颗的同一对红（.btn-primary.btn-stop）。 */
+.btn.btn-red {
+  background: linear-gradient(180deg, #ff9a9a, #e05a5a);
+  color: #2a0000;
+}
+.btn.btn-red:hover:not(:disabled) { filter: brightness(1.06); }
+/* 淡蓝描边胶囊（业主 2026-10-10：更新页那一排动作统一成通道那颗按钮原来的样子）。
+   底色是半透明的，所以它下面的卡片颜色会透上来 —— 这正是那颗的样子，不是没填实。
+   实心蓝/琥珀/红留给别的页面用，这一排不再按"会不会改盘上东西"分色。
+   悬停只提亮度：背景写在 .btn:hover 之后，不会被它盖回深色。 */
+.btn.btn-soft {
+  background: rgba(125, 211, 252, .16);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  color: #eaf6ff;
+}
+.btn.btn-soft:hover:not(:disabled) { filter: brightness(1.2); }
+
+/* ---------- 说明页（发布版内置 FAQ） ---------- */
+.help-block { margin: 14px 0 18px; }
+.help-block h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #dfe8f2;
+  margin: 0 0 8px;
+  padding-left: 9px;
+  border-left: 3px solid var(--accent);
+}
+.help-block ol, .help-block ul { margin: 0; padding-left: 22px; }
+.help-block li { font-size: 12px; line-height: 1.9; color: #c9d4e0; }
+.help-block dl { margin: 0; }
+.help-block dt { font-size: 12px; color: #e6eef7; margin-top: 8px; }
+.help-block dt::before { content: '· '; color: var(--accent); }
+.help-block dd { font-size: 12px; color: #9fb0c2; margin: 3px 0 0 14px; line-height: 1.7; }
+
+/* ---------- 应用内模态对话框（M3.1） ---------- */
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 6, 10, .55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fadein .12s ease-out;
+}
+.modal-box {
+  width: 430px;
+  max-width: 82%;
+  background: rgba(16, 22, 31, .97);
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 14px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .55);
+  padding: 20px 22px 16px;
+}
+.modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.modal-body {
+  font-size: 13px;
+  line-height: 1.75;
+  color: #c9d4e0;
+  white-space: pre-wrap;
+  margin-bottom: 18px;
+  /* 「启动配置与服务端程序不匹配」那条确认框会把守卫那份方向准确的处置整段带出来（长的能有
+     二三十行），默认窗口高度下会把「修复 / 取消」挤出屏幕 —— 遮罩是 flex 居中且不滚动，
+     按钮一旦出屏就等于玩家没有可点的东西。这里给正文一个上限并允许它自己滚动：
+     内容不长时（既有的端口占用 / 关闭确认等）完全看不出差别。 */
+  max-height: 56vh;
+  overflow-y: auto;
+}
+/* 弹窗里要放交互控件时的容器（见 app.js showModal 的 opts.slot）：#modalBody 是用 textContent
+   写正文的（防注入），塞不进 DOM 节点，所以单独一块，字号与颜色跟着正文走。 */
+.modal-slot { margin: -8px 0 18px; }
+.modal-slot-label { font-size: 12px; color: #93a4b8; margin-bottom: 6px; }
+.modal-select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid rgba(148, 163, 184, .35);
+  border-radius: 8px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 12px;
+}
+.modal-select:focus { outline: 1px solid var(--accent); }
+.modal-select option { background: #0f172a; color: #e2e8f0; }
+/* 选中的是哪一笔、能不能点，都写在这一行里（业主 2026-10-06：选定与当前一致时按钮要灰掉）。 */
+.modal-slot-note { margin-top: 8px; font-size: 12px; line-height: 1.6; color: #cbd5e1; word-break: break-all; }
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.modal-actions .btn { height: 34px; }
+.modal-actions .btn-amber {
+  background: linear-gradient(180deg, var(--amber-2), var(--amber-1));
+  border: none;
+  color: #2a1c00;
+  font-weight: 600;
+}
+.modal-actions .btn-amber:hover { filter: brightness(1.06); }
+.modal-actions .btn-red {
+  background: linear-gradient(180deg, #ff9a9a, #e05a5a);
+  border: none;
+  color: #2a0000;
+  font-weight: 600;
+}
+.modal-actions .btn-red:hover { filter: brightness(1.06); }
+
+/* ---------- 扩展：按键连发 ---------- */
+.af-list { margin: 4px 0 12px; }
+
+.af-item {
+  display: block;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  background: var(--panel-2);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+}
+
+.af-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 一键连招：缩进的步骤列表 */
+.af-steps {
+  margin: 7px 0 0 10px;
+  padding-left: 10px;
+  border-left: 2px solid var(--accent-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.af-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.af-step-no {
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+
+.af-label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+/* 「按住连发」不需要持续连发热键时的灰字说明 */
+.af-note {
+  color: var(--muted);
+  font-size: 12px;
+  opacity: .75;
+  margin-left: 2px;
+}
+.af-unit {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.af-key, .af-mode {
+  height: 30px;
+  min-width: 76px;
+  padding: 0 6px;
+  color: var(--text);
+  background: rgba(6, 10, 16, .85);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+}
+.af-key:focus, .af-mode:focus { outline: 1px solid var(--accent); }
+
+.af-num {
+  width: 62px;
+  height: 30px;
+  padding: 0 6px;
+  color: var(--text);
+  background: rgba(6, 10, 16, .85);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+}
+.af-num:focus { outline: 1px solid var(--accent); }
+
+.af-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #c9d4e0;
+  margin-left: 4px;
+}
+
+.af-del { margin-left: auto; }
+
+/* ---------- 底部作者与使用声明（固定在最底部，不参与主体布局） ---------- */
+.author-note {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15;
+  padding: 5px 18px 7px;
+  background: linear-gradient(180deg, rgba(5, 8, 12, .42), rgba(5, 8, 12, .93));
+  border-top: 1px solid var(--panel-border);
+  backdrop-filter: blur(10px);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  user-select: text;
+}
+.author-note b { color: #cfd8e3; font-weight: 600; }
+.author-note > div + div { margin-top: 1px; }
+
+/* ---------- 首次启动的静默准备（loading） ---------- */
+.setup-box { text-align: center; min-width: 300px; }
+.setup-spinner {
+  width: 26px; height: 26px; margin: 4px auto 16px;
+  border: 3px solid rgba(255, 255, 255, .16);
+  border-top-color: #f0b429;
+  border-radius: 50%;
+  animation: setup-spin .9s linear infinite;
+}
+@keyframes setup-spin { to { transform: rotate(360deg); } }
+
+/* Tab 上的「有更新」角标 */
+.tab-badge {
+  display: inline-block; width: 7px; height: 7px;
+  margin-left: 6px; vertical-align: 1px;
+  border-radius: 50%; background: #e5484d;
+}
+
+/* ---------- 进度条（数字 + 条形：进度要"喂到嘴边"才看得懂） ---------- */
+.progress { display: flex; align-items: center; gap: 10px; margin: 8px 0 2px; }
+.progress-bar {
+  flex: 1 1 auto; height: 8px; border-radius: 99px;
+  background: rgba(255, 255, 255, .10);
+  border: 1px solid var(--panel-border);
+  overflow: hidden;
+}
+.progress-bar > i {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--accent), #7bd0ff);
+  transition: width .18s linear;
+}
+.progress-text {
+  flex: 0 0 auto; font-size: 12px; color: var(--muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+/* 没有确定百分比的阶段（例如 go build）用循环动画，避免进度条看着像卡死 */
+.progress.indeterminate .progress-bar > i {
+  width: 32%; transition: none;
+  animation: progress-slide 1.15s ease-in-out infinite;
+}
+@keyframes progress-slide {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(320%); }
+}
+
+/* ---------- 新手指引（首次打开时的操作巡览） ---------- */
+/* 四块遮罩拼出一个"洞"露出目标元素：比"把元素 z-index 提到遮罩之上"稳得多——
+   不用碰 .card 的 backdrop-filter 层叠上下文，目标元素也保持完全正常、可直接点击。
+   层级刻意排在提示条（100）与模态框（200）之下：引导期间的 toast 与初始化进度弹窗
+   都要能盖住它。上边界从标题栏下沿开始，窗口的最小化/关闭按钮始终可用。 */
+.tour-layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 62px;
+  bottom: 0;
+  z-index: 80;
+  pointer-events: none;
+}
+.tour-block {
+  position: absolute;
+  background: rgba(4, 8, 14, .62);
+  backdrop-filter: blur(2px);
+  pointer-events: auto; /* 吃掉误点：引导期间只能操作被高亮的那个元素 */
+}
+.tour-ring {
+  position: absolute;
+  z-index: 1;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  box-shadow: 0 0 0 4px rgba(55, 182, 255, .22), 0 0 26px rgba(55, 182, 255, .5);
+  pointer-events: none;
+  transition: left .18s ease-out, top .18s ease-out, width .18s ease-out, height .18s ease-out;
+}
+.tour-tip {
+  position: absolute;
+  z-index: 2;
+  width: 320px;
+  padding: 13px 15px;
+  background: linear-gradient(180deg, rgba(20, 28, 40, .98), rgba(11, 16, 24, .98));
+  border: 1px solid rgba(55, 182, 255, .5);
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .55);
+  pointer-events: auto;
+}
+.tour-step { color: var(--accent); font-size: 11px; letter-spacing: 1px; margin-bottom: 5px; }
+.tour-title { color: #fff; font-size: 14px; font-weight: 700; margin-bottom: 7px; }
+/* 字号取本地的 12px 而不是上游的 12.5px：第十一批把全站字号归一成
+   11/12/13/14/15/18 这一套阶梯，12.5 是阶梯之前的旧值。上游新增的图标规则收下。 */
+.tour-body { color: #c9d4e0; font-size: 12px; line-height: 1.75; white-space: pre-line; }
+/* 指引正文里的警示图标（原来是文案开头那个三角警示 emoji）：跟随警示色，与文字同基线 */
+.tour-body .ico-warn { color: var(--warn); vertical-align: -0.2em; }
+.tour-actions { display: flex; align-items: center; gap: 8px; margin-top: 13px; }
+.tour-actions .spacer { flex: 1; }
+.tour-actions .tour-primary {
+  background: linear-gradient(180deg, var(--amber-2), var(--amber-1));
+  border: none;
+  color: #2a1c00;
+  font-weight: 700;
+}
+.tour-actions .tour-primary:hover { filter: brightness(1.06); }
+.tour-skip {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+.tour-skip:hover { color: #cbd5e1; }
+
+/* ---------- MOD 工具：mod 库（分页列表 + 批量工具栏） ----------
+   业主 2026-10-06 定：这一页改成 mod 库管理器，列表列固定为
+   复选框 / mod 名称 / 添加日期 / 安装状态（只读标记）/ 制作人。
+   样式全部用 ml- 前缀，不要与「存档 / 更新」那些行的类混用。 */
+.ml-bar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin: 2px 0 4px;
+}
+.ml-dry { white-space: nowrap; }
+.ml-error { color: #ff9b9b; }
+
+.ml-wrap {
+  margin-top: 6px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  overflow: auto;
+  max-height: 42vh;
+}
+.ml-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.ml-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: rgba(12, 17, 24, .96);
+  color: var(--muted); font-weight: 600; text-align: left;
+  padding: 8px 10px; white-space: nowrap;
+  border-bottom: 1px solid var(--panel-border);
+}
+.ml-table tbody td {
+  padding: 8px 10px; vertical-align: top;
+  color: #cfd8e3;
+  border-bottom: 1px solid rgba(255, 255, 255, .05);
+}
+.ml-table tbody tr:last-child td { border-bottom: none; }
+.ml-table tbody tr:hover { background: rgba(255, 255, 255, .03); }
+.ml-table tbody tr.ml-picked { background: rgba(245, 166, 35, .08); }
+.ml-chk { width: 34px; }
+.ml-chk input {
+  width: 15px; height: 15px; margin: 0;
+  accent-color: var(--amber-1); cursor: pointer;
+}
+.ml-date {
+  width: 128px; white-space: nowrap;
+  font-variant-numeric: tabular-nums; color: var(--muted);
+}
+/* 「安装状态」列只放「已安装 / 未安装」两个短词（业主 2026-10-07：安装与生效分两列）。
+   "装完不等于生效"的说明搬到隔壁「生效」列，别再挤在这一格里。 */
+.ml-state { width: 96px; }
+/* 「生效」列：热开关 + 到底生不生效（生效中 / 已停用 / 待重启生效 / 待服务端读取 /
+   未生效（需编译服务端））。取值优先来自服务端进程写的实况文件，读不到才退回本地推断。
+   这一格可能带一行 .ml-stale-note 说明原因，还要塞下一枚开关，所以留够宽度。 */
+.ml-effective { width: 236px; }
+.ml-ops { width: 92px; }
+.ml-author { width: 140px; }
+.ml-name { color: var(--text); font-weight: 600; }
+.ml-sub { color: var(--muted); font-size: 11.5px; margin-top: 2px; word-break: break-all; }
+.ml-path { font-family: Consolas, "Courier New", monospace; opacity: .85; }
+.ml-problem { margin-top: 4px; color: #ffb4a2; font-size: 11.5px; }
+
+/* —— MOD 列表专用：简介列 + 行高缩减（业主 2026-10-07）——
+   三条一起才成立：
+   1) `table-layout: fixed` —— 列宽才说了算，简介列才能稳定吃掉剩余宽度；
+   2) 名称列给死宽，其余列沿用上面的 px，简介列不设宽 = 拿剩下全部；
+   3) **每格只允许一行**：简介 / 副行 / 校验问题全部 nowrap + 省略号，全文进 title。
+      从前"校验不通过"那段长文本在半个窗口宽的窄列里折成十几行，一行就把表顶得极高
+      （业主截图里那一行就是这么来的）—— 这才是行高的真正大头，光减 padding 没用。 */
+.ml-table-mods { table-layout: fixed; }
+.ml-table-mods .ml-name-col { width: 230px; }
+.ml-table-mods .ml-date { width: 104px; }
+.ml-table-mods .ml-state { width: 84px; }
+.ml-table-mods .ml-enable { width: 56px; }
+.ml-table-mods .ml-effective { width: 188px; }
+.ml-table-mods .ml-ops { width: 84px; }
+.ml-table-mods .ml-author { width: 118px; }
+.ml-table-mods tbody td { padding: 4px 8px; vertical-align: middle; }
+.ml-table-mods .ml-sub,
+.ml-table-mods .ml-problem,
+.ml-table-mods .ml-stale-note {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ml-table-mods .ml-sub { margin-top: 1px; word-break: normal; }
+.ml-table-mods .ml-problem { margin-top: 1px; }
+/* 简介列：一行截断（全文在 title 里）。 */
+.ml-desc {
+  color: var(--muted);
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+
+.ml-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-size: 11.5px; border: 1px solid var(--panel-border);
+  white-space: nowrap;
+}
+.ml-badge-on {
+  color: #8ff0b0;
+  border-color: rgba(120, 240, 170, .45);
+  background: rgba(120, 240, 170, .10);
+}
+.ml-badge-off { color: var(--muted); }
+/* 「已安装但当前不生效」：警示色，与"装好了"的绿色明确区分开。
+   业主 2026-10-06 现场：面板显示"已安装"，两条规则却一条都不生效 —— 就靠这个颜色把人拦下来。 */
+.ml-badge-warn {
+  color: #ffd18a;
+  border-color: rgba(245, 166, 35, .55);
+  background: rgba(245, 166, 35, .12);
+}
+.ml-stale-note {
+  margin-top: 4px; color: #ffcf8f; font-size: 11px; line-height: 1.45;
+}
+
+/* 「操作」列那颗「编辑」按钮：只有带自带管理页的 mod 才有（判据在后端，
+   mod 框架通用架构：包内 settings 目录）。悬停提亮，与「生效」列的徽章同高。 */
+.ml-edit {
+  display: inline-block; padding: 2px 14px; border-radius: 10px;
+  font-size: 11.5px; font-family: inherit; cursor: pointer;
+  color: #9ad7ff; border: 1px solid rgba(90, 170, 255, .5);
+  background: rgba(90, 170, 255, .10);
+}
+.ml-edit:hover { background: rgba(90, 170, 255, .22); }
+/* 「启用」列里的热开关（业主 2026-10-11：MOD 页改成和 115us 配套的热加载模式，
+   同日追加：开关单独占一列，不塞在「生效」列里 —— 那一列只显示结论，不动手。
+   服务端层写 mods/enabled.json，客户端层写 mod 自己声明的旗子，两者都是真开关；
+   没声明旗子的行（纯资源层）不出现开关 —— 按下去什么都不发生的开关比不给更糟。 */
+.ml-switch {
+  position: relative; display: inline-flex; vertical-align: middle;
+  margin-right: 6px; cursor: pointer;
+}
+.ml-switch input {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  margin: 0; opacity: 0; cursor: pointer;
+}
+.ml-switch-track {
+  position: relative; display: inline-block; width: 30px; height: 16px;
+  border-radius: 9px; border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, .10);
+  transition: background .15s, border-color .15s;
+}
+.ml-switch-track::after {
+  content: ""; position: absolute; left: 2px; top: 2px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--muted);
+  transition: transform .15s, background .15s;
+}
+.ml-switch input:checked + .ml-switch-track {
+  background: rgba(120, 240, 170, .22);
+  border-color: rgba(120, 240, 170, .45);
+}
+.ml-switch input:checked + .ml-switch-track::after { transform: translateX(13px); background: #8ff0b0; }
+.ml-switch input:focus-visible + .ml-switch-track { outline: 2px solid var(--amber-1); outline-offset: 2px; }
+.ml-switch input:disabled { cursor: default; }
+.ml-switch input:disabled + .ml-switch-track { opacity: .55; }
+
+.ml-pager {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-top: 10px;
+}
+.ml-size { white-space: nowrap; }
+.ml-size .row-sel { height: 24px; padding: 0 6px; }
+
+/* 安装/卸载的步骤面板：引擎原文照抄，长输出自己滚，不把卡片撑高。 */
+.ml-steps {
+  margin-top: 12px; display: flex; flex-direction: column; gap: 8px;
+  max-height: 34vh; overflow-y: auto;
+}
+.ml-step {
+  border: 1px solid var(--panel-border); border-radius: 10px;
+  padding: 8px 10px; background: rgba(255, 255, 255, .02);
+}
+.ml-step-ok { border-color: rgba(120, 240, 170, .30); }
+.ml-step-bad { border-color: rgba(255, 120, 120, .35); }
+.ml-step-head { display: flex; align-items: center; gap: 8px; }
+.ml-step-title { font-weight: 600; color: var(--text); font-size: 12.5px; }
+.ml-step-log {
+  margin: 6px 0 0; padding: 8px;
+  max-height: 200px; overflow: auto;
+  white-space: pre-wrap; word-break: break-all;
+  font-size: 11.5px; line-height: 1.5; color: #b9c6d4;
+  background: rgba(0, 0, 0, .28); border-radius: 8px;
+  font-family: Consolas, "Courier New", monospace;
+}
+
+/* ---------- 「MOD 工具」页：上下两张卡片**一样大**（业主 2026-10-06） ----------
+   现场（截图）：下面「Lua 规则脚本」那张卡明显比上面的 mod 列表窄（约 484px vs 856px），
+   而且两张卡都被自己的滚动区截断（上面第 4 行、下面的表体都被切掉）。两颗根因都在通用规则里：
+     · 宽度是 `width: fit-content`（上面那条）—— 宽度随内容变，下面那块内容少就窄一截；
+     · 高度是 `flex: 0 1 auto`（第 487 行）—— 整页放不下时两张卡一起被压，卡片只有 ~340px
+       而里面的表体有固定高度，于是列表被卡片自己的滚动区截断。
+   （上一次改的"把表体固定成 42vh"只治了"空表塌成一行"，反而加剧了截断 —— 那次判断错了一半；
+   实测证据：卡片 338px、表体却是 343px。）
+
+   现在：两张卡各占**半宽半高**（同宽 50%、同高 flex: 1 1 0），列表区 `flex: 1 1 auto`
+   填满卡片剩下的空间 —— 列表大小与内容无关（空表也是这么大），也不再有截断。
+   `min-height: 140px` 是兜底：窗口很矮或下面那张卡展开编辑器时，卡片内部改由滚动承接，
+   而不是把列表压成一条缝（140 是"上面那张卡的工具条在 50% 宽度下会换成两行"实测出来的余量）。 */
+#page-mods > .card {
+  display: flex; flex-direction: column;
+  flex: 1 1 0; min-height: 0;
+  /* 业主 2026-10-07：MOD 界面要拉宽。
+     从前这里限死 50%，列表只有半个窗口 —— 那是"两张卡并排视觉对齐"的老口径，
+     现在这一页要放「简介」列，宽度必须让给内容。 */
+  width: 100%; max-width: none;
+  overflow-wrap: anywhere;
+}
+#page-mods .ml-wrap, #page-mods .lua-wrap {
+  flex: 1 1 auto; min-height: 140px;
+  max-height: none;
+}
+
+/* MOD 工具页的**手风琴**（业主 2026-10-07）。
+   从前 `#page-mods > .card { flex: 1 1 0 }` 让两张卡**强制等高平分**，
+   于是 mod 列表被挤到只剩三四行；现在同一时间只展开一张：
+   展开的那张拿走全部剩余高度，另一张只留一行可点的标题。
+   `.card-body` 是新增的一层，必须把 flex 链透下去（否则里面 .ml-wrap 的
+   `flex: 1 1 auto` 会失效、列表又变回定高）。 */
+#page-mods > .card.card-fold { flex: 0 0 auto; }
+#page-mods > .card.card-fold.fold-open { flex: 1 1 auto; min-height: 0; }
+#page-mods > .card.card-fold > .card-body {
+  display: flex; flex-direction: column;
+  flex: 1 1 auto; min-height: 0;
+}
+#page-mods > .card.card-fold.fold-collapsed > .card-body { display: none; }
+
+#page-mods .card-head {
+  margin: 4px 0 10px; font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; user-select: none;
+}
+#page-mods .card-head:hover { color: #fff; }
+#page-mods .card-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+/* 小三角指示器：展开时转 90°，一眼能看出哪张是开的。 */
+#page-mods .fold-ico {
+  width: 0; height: 0; flex: none;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent; border-bottom: 4px solid transparent;
+  transition: transform .12s ease-out;
+}
+#page-mods .card-fold.fold-open .fold-ico { transform: rotate(90deg); }
+#page-mods .card-fold.fold-collapsed .card-head { margin-bottom: 2px; color: var(--muted); }
+
+/* MOD 页要**缩短一点点**：这一页的卡片占满整高，底部会伸进右下两颗悬浮按钮
+   （`工具` / `首页`）占掉的那条带里，翻页条与表格右端被压住
+   （业主 2026-10-07：「mod 页面稍微缩短一点点，翻页按钮被首页和工具按钮挡住了」）。
+   留出 --floatbtn-band 就正好让开它们。只给 MOD 页 —— 其它页面的卡片不占满整高。 */
+#page-mods { padding-bottom: var(--floatbtn-band); }
+
+/* Lua 规则脚本：类名统一用 lua- 前缀，不与 ml- 那套混用。 */
+.lua-wrap { max-height: 42vh; }
+.lua-pick { cursor: pointer; }
+.lua-row-on { background: rgba(245, 166, 35, .10); }
+.lua-editor {
+  margin-top: 12px; padding: 10px;
+  border: 1px solid var(--panel-border); border-radius: 10px;
+  background: rgba(255, 255, 255, .02);
+}
+.lua-editor-head {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.lua-text {
+  width: 100%; min-height: 220px; max-height: 46vh; resize: vertical;
+  box-sizing: border-box; padding: 10px;
+  color: #d7e2ee; background: rgba(0, 0, 0, .30);
+  border: 1px solid var(--panel-border); border-radius: 8px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px; line-height: 1.55;
+  white-space: pre; overflow: auto;
+}
+.lua-text:focus { outline: none; border-color: var(--amber-1); }
+

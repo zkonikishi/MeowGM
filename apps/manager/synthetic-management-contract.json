@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "status": "implemented-local-synthetic-reference-only",
+  "protocol": "meowgm-fixture-v1",
+  "is_production_abi": false,
+  "is_game_server_control": false,
+  "activation": "MEOW_GM_SYNTHETIC_CONTROL=1 at host process startup; default disabled; no GUI/API enable setting",
+  "authentication": "existing private desktop window capability and HttpOnly SameSite session; Origin+Host enforced for mutations; no player credentials or database secret",
+  "transport": "loopback desktop API and owned child stdin/stdout; no external HTTPS client/listener",
+  "routes": {
+    "GET /api/admin/fixture-control/status": "synthetic-only state/running/healthy; health needs own worker heartbeat younger than 3 seconds",
+    "GET /api/admin/fixture-control/logs?after=N": "200-line bounded memory ring; sequence cursor and truncation flag; built-in constant diagnostic text only",
+    "POST /api/admin/fixture-control/start": "body exactly {}; fixed bundled fixture worker only; no command/PID/path/realm/credential input; wait for versioned handshake",
+    "POST /api/admin/fixture-control/stop": "body exactly {}; stop only Popen object owned by this instance; no name-based search/kill"
+  },
+  "ownership": "explicit stop, gateway close, native-parent exit all clean up the owned worker; no permanent background automation",
+  "scope_review": "host owner confirmed no frozen real management endpoint/log ABI/owned-process contract on 2026-10-16; production proposal remains separate and unnegotiated",
+  "required_before_real_host_adoption": [
+    "signed deployment identity and productMode/realm binding",
+    "independent scoped administrative credential",
+    "TLS and replay policy review",
+    "host-defined allowed units and owned-process identity",
+    "redacted real log ABI",
+    "control center approval of deployment"
+  ],
+  "prohibited": [
+    "DFO execution",
+    "player database access",
+    "arbitrary commands or shell",
+    "global PID control",
+    "public listener",
+    "player-token reuse"
+  ],
+  "host_review": {
+    "date": "2026-10-16",
+    "owner_thread": "01a13f65-efeb-7cb0-a902-3a4ec55abad6",
+    "result": "scope-only-reviewed: local synthetic fixed worker/private desktop session/owned Popen boundary appropriate",
+    "independent_test": false,
+    "production_approval": false
+  }
+}

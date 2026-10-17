@@ -1,0 +1,313 @@
+<div class="page" id="page-gm">
+      <header class="gm-heading"><div><h1>GM 管理工作区</h1><span id="gmResourceStatus">账号、角色与游戏资产</span></div><div class="gm-heading-actions"><button class="btn" id="gmPrepare" hidden>重新连接</button> <button class="btn" id="gmRefresh">刷新数据</button></div></header>
+      <div id="gmStatus" role="status" aria-live="polite" title="点击关闭" hidden>选择账号和角色开始管理。</div>
+      <div class="gm-layout" id="gmLayout" data-inspector="off">
+        <section class="gm-workspace">
+          <div id="gmTarget">尚未选择角色</div>
+          <nav class="gm-tabs" aria-label="管理功能">
+            <button data-gm-tab="character" class="active">角色属性</button><button data-gm-tab="bag">背包装备</button><button data-gm-tab="equipment">装备发放</button><button data-gm-tab="items">物品发放</button><button data-gm-tab="pets">宠物发放</button><button data-gm-tab="avatar">时装搭配</button><button data-gm-tab="materials">晶体仓库</button><button data-gm-tab="quests">任务管理</button><button data-gm-tab="difficulty">副本难度</button>
+          </nav>
+          <section id="gmCharacter" class="gm-pane">
+            <section class="gm-advance">
+              <h2>角色进阶</h2>
+              <div class="gm-advance-actions">
+                <button class="gm-advance-btn" type="button" data-advance="profession">转职 / 觉醒</button>
+                <button class="gm-advance-btn" type="button" data-advance="mainline">一键完成主线任务</button>
+                <button class="gm-advance-btn" type="button" data-advance="equipment">开启特殊装备槽</button>
+                <button class="gm-advance-btn" type="button" data-advance="sp">增加 SP</button>
+              </div>
+              <p id="gmProfessionSummary" class="gm-note">选择角色后显示当前转职分支与觉醒阶段。</p>
+            </section>
+            <div class="gm-cards">
+              <form id="gmLevel" class="gm-card">
+                <h2>角色等级</h2>
+                <p class="gm-note">按输入的数值调整当前角色等级。</p>
+                <p id="gmLevelNow" class="gm-card-value">尚未选择角色</p>
+                <label>等级<input name="value" type="number" min="1" max="65535" step="1" value="1" required></label>
+                <button class="btn btn-blue" type="submit">保存等级</button>
+              </form>
+              <form id="gmGold" class="gm-card">
+                <h2>角色金币</h2>
+                <p class="gm-note">为当前角色增加金币，账号点券不受影响。</p>
+                <p id="gmGoldNow" class="gm-card-value">尚未选择角色</p>
+                <label>金币<input name="gold" type="number" min="0" max="4294967295" step="1" value="0" required></label>
+                <button class="btn btn-blue" type="submit">保存金币</button>
+              </form>
+              <form id="gmCera" class="gm-card">
+                <h2>账号点券</h2>
+                <p class="gm-note">同一账号所有角色共享余额。</p>
+                <p id="gmCeraNow" class="gm-card-value">尚未选择角色</p>
+                <label>点券<input name="cera" type="number" min="0" max="9007199254740991" step="1" value="0" required></label>
+                <button class="btn btn-blue" type="submit">保存点券</button>
+              </form>
+            </div>
+            <form id="gmArchive" class="gm-card gm-card-row">
+              <div><h2>删除角色</h2><p class="gm-note">永久删除当前角色及其物品、邮件和进度；账号点券、晶体等共享数据保留，原存档保留归档。</p></div>
+              <label>输入完整角色名<input name="name" required autocomplete="off"></label>
+              <button class="btn btn-danger" type="submit">删除角色</button>
+            </form>
+            <p class="gm-note">技能点管理已接本地原生 GM；其他写入功能待逐项验证后开放。</p>
+          </section>
+          <section id="gmCatalog" class="gm-pane" hidden>
+            <header id="gmStudioBar" class="gm-studio-bar" hidden><div><h2>时装工作室</h2></div><div class="gm-studio-actions"><button class="btn" id="gmStudioFocus" type="button">专注预览</button><button class="btn" id="gmStudioLoad" type="button">载入草稿</button><button class="btn" id="gmStudioSave" type="button">保存草稿</button><button class="btn" id="gmStudioClear" type="button">重置</button></div></header>
+            <div class="gm-cat-body">
+              <aside id="gmCatTree" class="gm-cat-tree" aria-label="物品分类"></aside>
+              <div class="gm-cat-main">
+                <section id="gmStudio" class="gm-studio" hidden>
+                  <header class="gm-studio-title"><strong>试衣间 <small id="gmStudioCount">0 / 11</small></strong><span>点击右侧时装试穿，同部位自动替换</span></header>
+                  <div class="gm-studio-stage" title="滚轮缩放，按住鼠标左键拖动；点击“适应”恢复居中。">
+                    <div id="gmStudioLayers" class="gm-studio-layers" aria-label="时装预览"></div>
+                    <span id="gmStudioEmpty" class="gm-studio-empty">正在合成…</span>
+                  </div>
+                  <div id="gmStudioList" class="gm-studio-list"></div>
+                  <div class="gm-studio-toolbar">
+                    <div class="gm-studio-actions">
+                      <button class="btn" id="gmStudioPlay" type="button">暂停</button>
+                      <label class="gm-studio-action">动作<select id="gmStudioAction" aria-label="预览动作"><option value="rest">站街</option><option value="stay">进图</option><option value="move">移动</option></select></label>
+                      <label class="gm-studio-smooth"><input id="gmStudioSmooth" type="checkbox">平滑放大</label>
+                      <label class="gm-studio-action gm-studio-background">背景<select id="gmStudioBackground" aria-label="画布背景"><option value="dark">深灰</option><option value="black">纯黑</option><option value="light">雾白</option><option value="warm">暖灰</option><option value="blue">藏蓝</option><option value="checker-light">浅棋盘</option><option value="checker-dark">深棋盘</option></select></label>
+                      <button class="btn" id="gmStudioZoomOut" type="button" aria-label="缩小预览"><svg class="ico ico-14"><use href="#i-min"></use></svg></button>
+                      <button class="btn" id="gmStudioFit" type="button">适应</button>
+                      <button class="btn" id="gmStudioZoomIn" type="button" aria-label="放大预览"><svg class="ico ico-14"><use href="#i-plus"></use></svg></button>
+                    </div>
+                    <p id="gmStudioHint" class="gm-studio-hint" role="status">请选择角色</p>
+                  </div>
+                  <div class="gm-studio-share">
+                    <label for="gmShareCode">搭配分享码</label>
+                    <input id="gmShareCode" type="text" spellcheck="false" autocomplete="off"
+                           placeholder="点「生成」得到分享码；把别人的码粘进来再点「载入搭配」">
+                    <button class="btn" id="gmShareMake" type="button">生成</button>
+                    <button class="btn btn-blue" id="gmShareCopy" type="button">复制</button>
+                    <button class="btn" id="gmShareApply" type="button">载入搭配</button>
+                  </div>
+                  <footer class="gm-studio-footer"><span id="gmStudioRecipient">尚未选择角色</span><button class="btn btn-blue" id="gmStudioSend" type="button" disabled>邮件发送搭配（0 件）</button></footer>
+                </section>
+                <header id="gmAvatarHeader" class="gm-avatar-header" hidden><div><h2>时装图鉴</h2><span id="gmAvatarCount"></span></div><div class="gm-avatar-controls"><label class="gm-avatar-job">预览职业<select id="gmStudioJob" aria-label="预览职业"></select></label><div class="gm-avatar-modes" role="group" aria-label="时装目录模式"><button type="button" data-avatar-mode="single" aria-pressed="true" class="active">单件</button><button type="button" data-avatar-mode="sets" aria-pressed="false">套装</button></div></div></header>
+                <nav id="gmAvatarParts" class="gm-avatar-parts" aria-label="时装部位" hidden></nav>
+                <button id="gmAvatarRelated" type="button" class="gm-avatar-related" hidden></button>
+                <form id="gmFilter" class="gm-cat-search">
+                  <input name="q" placeholder="物品名称或 ID（回车搜索）" aria-label="物品名称或 ID">
+                  <input type="hidden" name="type" id="gmFilterType">
+                  <label class="gm-lv">Lv <input name="level_min" type="number" min="0" max="255" placeholder="最低" aria-label="最低等级"><span>-</span><input name="level_max" type="number" min="0" max="255" placeholder="最高" aria-label="最高等级"></label>
+                  <select name="rarity" aria-label="稀有度"><option value="">全部稀有度</option></select>
+                  <button class="btn btn-blue" type="submit">搜索</button>
+                  <button class="btn" id="gmFilterReset" type="button">重置</button>
+                  <span id="gmCatalogCount" class="gm-cat-count"></span>
+                </form>
+                <div id="gmAvatarGrid" class="gm-avatar-grid" hidden></div>
+                <div id="gmCatalogBulk" class="gm-catalog-bulk" hidden><span id="gmCatalogSelected" aria-live="polite">当前页已选 0 项</span><button type="button" id="gmCatalogAddSelected" class="btn" disabled>加入发放清单</button><span class="gm-note">按各行数量加入，右侧统一核对发放</span></div>
+                <div class="gm-table-wrap"><table class="gm-table gm-cat-table"><thead><tr><th class="gm-col-select"><input type="checkbox" id="gmCatalogSelectAll" class="gm-catalog-check" aria-label="全选当前页" title="全选当前页" disabled></th><th class="gm-col-icon"></th><th>ID</th><th>名称</th><th id="gmCatalogLevel">Lv</th><th>品质</th><th>类型</th><th class="gm-col-fame" title="未加工装备的基础名望">基础名望</th><th class="gm-col-amount">数量</th><th>操作</th></tr></thead><tbody id="gmItems"></tbody></table></div>
+                <footer class="gm-pagination">
+                  <span id="gmPage" role="status" aria-live="polite"></span>
+                  <div class="gm-page-nav" role="group" aria-label="分页导航"><button class="btn" id="gmFirst" type="button">首页</button><button class="btn" id="gmPrev" type="button">上一页</button><button class="btn" id="gmNext" type="button">下一页</button><button class="btn" id="gmLast" type="button">末页</button></div>
+                  <div class="gm-page-jump"><label for="gmPageJump">跳到</label><input id="gmPageJump" type="number" min="1" step="1" inputmode="numeric" aria-label="跳转页码"><span>页</span><button class="btn" id="gmPageGo" type="button">跳转</button></div>
+                  <label class="gm-page-size">每页<select id="gmPageSize" aria-label="每页条数"><option value="15">15 条</option><option value="30">30 条</option><option value="35">35 条</option><option value="50">50 条</option><option value="60">60 条</option><option value="100">100 条</option><option value="200">200 条</option></select></label>
+                </footer>
+              </div>
+            </div>
+          </section>
+          <section id="gmBag" class="gm-pane" hidden>
+            <div class="gm-bag-bar">
+              <div id="gmBagChips" class="gm-chips" role="group" aria-label="背包分类"></div>
+              <input id="gmBagSearch" placeholder="筛选物品名称或 ID" aria-label="筛选背包物品">
+              <div class="gm-view-toggle" role="group" aria-label="显示方式">
+                <button class="btn active" data-bag-view="grid" type="button">网格</button>
+                <button class="btn" data-bag-view="list" type="button">列表</button>
+              </div>
+            </div>
+            <div class="gm-bag-body">
+              <div id="gmBagGrid" class="gm-bag-grid"></div>
+              <aside id="gmBagDetail" class="gm-bag-detail"><p class="gm-note">选择一件物品查看详情。</p></aside>
+            </div>
+          </section>
+          <section id="gmMaterials" class="gm-pane" hidden>
+            <header class="gm-material-heading"><div><h2>晶体仓库</h2><p class="gm-note">读取所选角色所在账号的仓库，同账号共享。保存会将数量设为指定值。</p></div><button id="gmMaterialsRefresh" class="btn btn-blue" type="button">刷新数量</button></header>
+            <p id="gmMaterialsStatus" class="gm-note" role="status">请选择角色后读取仓库。</p>
+            <div id="gmCrystalCards" class="gm-material-grid"></div>
+            <details id="gmSoulStorage" class="gm-material-more"><summary>灵魂材料</summary><div id="gmSoulCards" class="gm-material-grid"></div></details>
+          </section>
+          <section id="gmQuests" class="gm-pane" hidden>
+            <header class="gm-quest-heading"><div><h2>任务管理</h2><p class="gm-note">完成操作不发放奖励；标记可交后可进游戏正常交付。修改需先停止游戏服务，保存后重新选角生效。</p></div><button id="gmQuestsRefresh" class="btn btn-blue">刷新任务</button></header>
+            <div class="gm-quest-filters"><input id="gmQuestSearch" placeholder="搜索任务名称 / ID" aria-label="搜索任务名称或 ID"><select id="gmQuestStatus" aria-label="任务状态"><option value="active">进行中 / 可交付</option><option value="accepted">进行中</option><option value="ready">可交付</option><option value="completed">已完成</option><option value="all">全部状态</option></select><select id="gmQuestGrade" aria-label="任务类型"><option value="">全部类型</option></select></div>
+            <div class="gm-quest-toolbar"><button id="gmQuestSelectPage" class="btn">选择本页</button><button id="gmQuestClearSelection" class="btn">清空选择</button><button id="gmQuestBatchReady" class="btn btn-blue" disabled>批量标记可交</button><button id="gmQuestBatchComplete" class="btn" disabled>批量完成（无奖励）</button></div>
+            <p id="gmQuestNotice" class="gm-note" role="status"></p>
+            <div class="gm-table-wrap"><table class="gm-table gm-quest-table"><thead><tr><th>选择</th><th>任务</th><th>状态</th><th>剩余触发值</th><th>说明 / 前置</th><th>操作</th></tr></thead><tbody id="gmQuestRows"></tbody></table></div>
+            <footer class="gm-quest-pagination"><button id="gmQuestPrev" class="btn">上一页</button><span id="gmQuestPage" class="gm-note"></span><button id="gmQuestNext" class="btn">下一页</button></footer>
+          </section>
+          <section id="gmDifficulty" class="gm-pane" hidden>      <section class="tp-patch" id="tpPatch">
+        <header><h2>游戏实时执行</h2><span class="tp-chip" id="tpLiveState">正在读取…</span></header>
+        <div class="tp-patch-actions">
+          <button class="btn btn-blue" type="button" id="tpLiveStart">安装并加载 DLL</button>
+          <button class="btn" type="button" id="tpLiveStop">停用并恢复</button><button class="btn" id="tpDLLRemove" type="button">卸载 DLL</button>
+        </div>
+        <p class="tp-patch-msg" id="tpLiveMsg" role="status"></p>
+        <p class="tp-patch-note">安装一次后，每次游戏启动自动加载。规则通常约 1 秒生效，关闭 GM 或启动器后仍继续执行；停用可恢复存活怪物，卸载需先退出游戏。</p>
+      </section>
+      <p class="tp-pane-hint">同一时间只启用一条规则。启用另一条时，其余规则自动停用；全部停用则恢复原版。</p>
+
+            <div class="gm-dr-shell">
+              <div class="gm-dr-topbar">
+                <div>
+                  <h2>副本难度</h2>
+                  <p class="gm-dr-lead">全局规则与所选角色无关。三步建立一条难度规则：选范围 → 设参数 → 确认保存。启用一条规则后，其余规则自动停用；分类只作显示参考。</p>
+                </div>
+                <div class="gm-dr-topactions">
+                  <span class="gm-dr-pill" id="gmDr-saveState">正在读取…</span>
+                  <button class="btn" type="button" id="gmDr-reload">重新读取</button>
+                  <button class="btn" type="button" id="gmDr-selfcheck">自检</button>
+                  <button class="btn" type="button" id="gmDr-reset">清空全部</button>
+                  <button class="btn" type="button" id="gmDr-help">使用说明</button>
+                </div>
+              </div>
+
+              <div class="gm-dr-banner"><div><strong>血量、攻防、速度、攻击行为及受击硬直参数已接入。</strong> 切换血量倍率保留受伤比例，整数取整可能产生少量损耗；死亡怪物不会复活。原值为 0 的属性乘倍仍为 0，原本关闭的抗性系统保持关闭。</div></div>
+
+              <div class="gm-dr-diagnostics" id="gmDr-diagnostics" hidden></div>
+              <ul class="gm-dr-warnings" id="gmDr-warnings" hidden></ul>
+
+              <section class="gm-dr-card">
+                <div class="gm-dr-steps" id="gmDr-steps"></div>
+                <div class="gm-dr-stepbody" id="gmDr-stepBody"></div>
+              </section>
+
+              <section class="gm-dr-card">
+                <header>
+                  <h2>已保存规则</h2>
+                  <div class="gm-dr-topactions">
+                    <span class="gm-dr-muted" id="gmDr-rulesSummary"></span>
+                    <button class="btn" type="button" id="gmDr-import">批量导入</button>
+                    <button class="btn" type="button" id="gmDr-export">批量导出</button>
+                    <input id="gmDr-importFiles" type="file" accept=".json,application/json" multiple hidden>
+                  </div>
+                </header>
+                <div class="gm-dr-stepbody">
+                  <div class="gm-dr-rulelist" id="gmDr-rules"></div>
+                </div>
+              </section>
+
+              <footer class="gm-dr-page">全服规则，与当前选择的角色无关。切换菜单会保留未保存的编辑。</footer>
+            </div>
+
+            <dialog id="gmDr-importDialog">
+              <div class="gm-dr-dlghead"><div><h2>批量导入规则</h2><small>追加到现有列表末尾，保留文件内顺序，不覆盖已有规则。</small></div><button type="button" class="btn" data-close>关闭</button></div>
+              <div class="gm-dr-dlgbody">
+                <p id="gmDr-importSummary"></p>
+                <ol id="gmDr-importNames"></ol>
+                <p class="gm-dr-muted">导入后最多保留一条启用；已有启用规则优先保留。导出的规则包含全部参数和例外副本，不包含角色存档。</p>
+                <p id="gmDr-importError" role="alert"></p>
+              </div>
+              <div class="gm-dr-dlgactions"><button type="button" class="btn" data-close>取消</button><button id="gmDr-importConfirm" type="button" class="btn btn-blue">确认追加导入</button></div>
+            </dialog>
+
+            <dialog id="gmDr-detailDialog">
+              <div class="gm-dr-dlghead">
+                <div><h2 id="gmDr-detailTitle">副本</h2><small id="gmDr-detailSub"></small></div>
+                <button class="btn" data-close>关闭</button>
+              </div>
+              <div class="gm-dr-dlgbody" id="gmDr-detailBody"></div>
+              <div class="gm-dr-dlgactions"><button class="btn" data-close>关闭</button></div>
+            </dialog>
+
+            <dialog id="gmDr-impactDialog">
+              <div class="gm-dr-dlghead">
+                <div><h2>命中清单</h2><small>按当前唯一启用的规则计算。</small></div>
+                <button class="btn" data-close>关闭</button>
+              </div>
+              <div class="gm-dr-dlgbody">
+                <div class="gm-dr-filters">
+                  <label class="gm-dr-field">搜索副本中文名、ID 或路径<input id="gmDr-impactQ" type="search" placeholder="例如：幽暗密林、5、Act1"></label>
+                  <label class="gm-dr-field">只看某条规则<select id="gmDr-impactRule"></select></label>
+                </div>
+                <div class="gm-dr-tablewrap">
+                  <table class="gm-table">
+                    <thead><tr><th>副本</th><th>入场等级</th><th>分类</th><th>采用规则</th><th></th></tr></thead>
+                    <tbody id="gmDr-impactRows"></tbody>
+                  </table>
+                  <div class="gm-dr-empty" id="gmDr-impactEmpty" hidden>没有命中的副本。</div>
+                </div>
+                <div class="gm-dr-pager"><span id="gmDr-impactCount"></span><span class="gm-dr-nav"><button class="btn" id="gmDr-impactPrev">上一页</button><button class="btn" id="gmDr-impactNext">下一页</button></span></div>
+              </div>
+              <div class="gm-dr-dlgactions"><button class="btn" data-close>关闭</button></div>
+            </dialog>
+
+            <dialog id="gmDr-helpDialog">
+              <div class="gm-dr-dlghead">
+                <div><h2>使用说明</h2><small>三步建立一条规则</small></div>
+                <button class="btn" data-close>关闭</button>
+              </div>
+              <div class="gm-dr-dlgbody">
+                <p class="gm-dr-muted">沿用启动器已选择的服务端和客户端目录；目录及中文名来自当前客户端 PVF。规则保存到服务端 runtime/storage/dungeon-rules.json，首次保存自动创建。关闭 GM 后 DLL 继续执行，重启游戏自动加载；点击「停用并恢复」才停止执行。卸载 DLL 需要先退出游戏。</p><ol class="gm-dr-helpsteps">
+                  <li><b>① 生效范围</b>：按入场等级范围批量命中，或手工指定副本（不限制选择数量）。等级是副本自己的最低入场等级，与玩家等级无关；等级未知的副本只能用「指定副本」方式加入。</li>
+                  <li><b>② 参数</b>：在共用参数、小怪、BOSS 三组中设置倍率，可选排除个别副本。1 为原版；小于 1 可降低非血量属性或减慢加速项。</li>
+                  <li><b>③ 确认保存</b>：先看命中数量与分类分布，再保存。保存后回到第一步，可以接着建下一条。</li>
+                </ol>
+                <p class="gm-dr-muted">同一时间最多启用一条规则，启用另一条会自动停用其余规则。范围以副本入场等级或指定 ID 判断，例外副本保持原版。</p>
+                <p class="gm-dr-muted">点击「安装并加载 DLL」后，保存与切换规则通常约 1 秒生效。停止执行、停用规则或离开规则范围会恢复原值。血量按原生基础值缩放，实际最大血量由游戏系数和取整决定。</p>
+                <p class="gm-dr-muted"><b>115 白图血量提示：</b>部分普通白图小怪的原始血量很低，增加 2～3 倍可能仍会被一击打死；可能需要几十倍到 100 倍才有明显效果。请根据角色伤害调整，并在目标副本观察实际耐打程度。</p>
+                <p class="gm-dr-muted">攻速过高可能导致动作抖动或无法命中，建议从较小倍率调整。技能原冷却为 0 时加速无变化；硬直恢复值不等于硬直持续时间。</p>
+                <p class="gm-dr-muted">分类依据（布局、任务、世界地图、证据）保留在副本详情里，可用来判断某个副本该不该加血。副本显示 DGN 英文文件名与已核对的 PVF 中文名，可按中文名、ID 与路径搜索。</p>
+
+
+
+
+              </div>
+              <div class="gm-dr-dlgactions"><button class="btn" data-close>关闭</button></div>
+            </dialog>
+
+            <div class="gm-dr-toast" id="gmDr-toast" role="status" aria-live="polite"></div>
+          </section>
+
+<section id="gmData" class="gm-pane" hidden>
+            <input id="gmDataSearch" placeholder="筛选当前记录" aria-label="筛选当前记录"><div class="gm-table-wrap"><table class="gm-table"><thead id="gmDataHead"></thead><tbody id="gmDataBody"></tbody></table></div>
+          </section>
+        </section>
+        <aside class="gm-inspector" id="gmInspector" hidden><div class="gm-inspector-heading"><h2>发放清单</h2><button class="btn" id="gmHistoryOpen" type="button">历史发放清单</button></div><p id="gmBasketTarget">请先选择角色</p><div id="gmBasket"></div><label>发放原因<input id="gmReason" value="GM 调整" maxlength="200"></label><label>发放方式<select id="gmDelivery"><option value="mail">发送到角色邮箱</option><option value="direct">直接写入背包</option></select></label><button class="btn btn-primary" id="gmSend">核对并发放清单</button><button class="btn" id="gmDraftSave">保存清单草稿</button><button class="btn" id="gmDraftLoad">读取清单草稿</button><button class="btn" id="gmClear">清空清单</button><p class="gm-note">邮件方式支持普通装备、道具与时装，宠物请选择直接发放。整组事务提交，失败时整组撤销。</p></aside>
+      </div>
+      <dialog id="gmConfirm"><h2>确认管理操作</h2><pre id="gmConfirmText"></pre><div class="gm-actions"><button class="btn" id="gmCancel">取消</button><button class="btn btn-primary" id="gmAccept">确认执行</button></div></dialog>
+      <dialog id="gmHistoryDialog" class="gm-history-dialog" aria-labelledby="gmHistoryTitle">
+        <header class="gm-history-heading"><h2 id="gmHistoryTitle">历史发放清单</h2><button class="btn" id="gmHistoryClose" type="button" aria-label="关闭历史发放清单"><svg class="ico ico-14"><use href="#i-close"></use></svg></button></header>
+        <p id="gmHistorySummary" class="gm-note">读取当前账号的装备、物品与宠物发放记录。</p>
+        <div class="gm-history-toolbar"><label>目标角色<select id="gmHistoryTarget"></select></label><button class="btn" id="gmHistorySelectAll" type="button">全选</button><button class="btn" id="gmHistoryClear" type="button">清空选择</button></div>
+        <div id="gmHistoryRows" class="gm-history-rows"></div>
+        <footer class="gm-actions"><button class="btn" id="gmHistoryRefresh" type="button">刷新</button><button class="btn btn-primary" id="gmHistoryReplay" type="button">复制发放</button></footer>
+      </dialog>
+      <dialog id="gmEquipmentDialog" aria-labelledby="gmEquipmentTitle">
+        <form id="gmEquipmentForm">
+          <header class="gm-advance-heading"><h2 id="gmEquipmentTitle">发送装备</h2><button class="btn" id="gmEquipmentClose" type="button" aria-label="关闭装备发送窗口"><svg class="ico ico-14"><use href="#i-close"></use></svg></button></header>
+          <p id="gmEquipmentTarget" class="gm-note"></p>
+          <div id="gmEquipmentFields" class="gm-advance-fields">
+            <label>强化等级（可留空）<input name="reinforce_level" type="number" min="0" max="31" placeholder="留空 = 不设置强化"></label>
+            <label>增幅等级（可留空）<input name="amplify_level" type="number" min="0" max="31" placeholder="留空 = 不设置增幅"></label>
+            <label>增幅类型<select name="amplify_type"><option value="1">体力</option><option value="2">精神</option><option value="3" selected>力量</option><option value="4">智力</option></select></label>
+            <label>锻造等级（可留空，只有武器）<input name="refine_level" type="number" min="0" max="8" placeholder="留空 = 不锻造；只有武器能锻造"></label>
+            <label>红字初始值（独立于等级）<input name="amplify_value" type="number" min="0" max="255" placeholder="按增幅书 PVF 随机值填写"></label>
+          </div>
+          <p id="gmEquipmentHint" class="gm-advance-hint">强化 / 增幅 / 锻造都留空：发送普通邮件；填写任一项：直接写入角色背包（重新选择角色或小退重进后生效）。</p>
+          <p id="gmEquipmentError" role="alert" hidden></p>
+          <footer class="gm-actions"><button class="btn" id="gmEquipmentCancel" type="button">取消</button><button class="btn btn-primary" type="submit">发送</button></footer>
+        </form>
+      </dialog>
+      <dialog id="gmProfessionDialog" aria-labelledby="gmProfessionTitle" aria-describedby="gmProfessionHelp">
+        <form id="gmProfessionForm">
+          <header class="gm-profession-heading"><h2 id="gmProfessionTitle">转职 / 觉醒</h2><button class="btn" id="gmProfessionClose" type="button" aria-label="关闭转职觉醒窗口"><svg class="ico ico-14"><use href="#i-close"></use></svg></button></header>
+          <p id="gmProfessionTarget"></p>
+          <div class="gm-profession-fields"><label>转职分支<select name="branch" required autofocus></select></label><label>觉醒阶段<select name="stage" required><option value="0">未觉醒</option><option value="1">一次觉醒</option><option value="2">二次觉醒</option><option value="3">三次觉醒</option></select></label></div>
+          <p id="gmProfessionHelp">更换分支后按所选阶段完成觉醒并补齐觉醒技能。等级、经验、装备及现有技能加点、SP / TP 保留。</p>
+          <p class="gm-profession-hint">重新进入角色后生效。</p>
+          <p id="gmProfessionError" role="alert" hidden></p>
+          <footer class="gm-actions"><button class="btn" id="gmProfessionCancel" type="button">取消</button><button class="btn btn-primary" type="submit">确认</button></footer>
+        </form>
+      </dialog>
+      <dialog id="gmAdvanceDialog" aria-labelledby="gmAdvanceTitle">
+        <form id="gmAdvanceForm">
+          <header class="gm-advance-heading"><h2 id="gmAdvanceTitle">角色进阶</h2><button class="btn" id="gmAdvanceClose" type="button" aria-label="关闭进阶操作窗口"><svg class="ico ico-14"><use href="#i-close"></use></svg></button></header>
+          <p id="gmAdvanceTarget"></p>
+          <div id="gmAdvanceFields" class="gm-advance-fields"></div>
+          <p id="gmEquipmentStatus" class="gm-note" hidden>请先选择角色查看解锁状态。</p>
+          <p id="gmAdvanceHelp"></p>
+          <p class="gm-advance-hint">重新进入角色后生效。</p>
+          <p id="gmAdvanceError" role="alert" hidden></p>
+          <footer class="gm-actions"><button class="btn" id="gmAdvanceCancel" type="button">取消</button><button class="btn btn-primary" type="submit">确认</button></footer>
+        </form>
+      </dialog>
+    </div>

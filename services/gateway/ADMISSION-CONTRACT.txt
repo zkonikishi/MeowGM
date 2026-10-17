@@ -1,0 +1,17 @@
+OO / S4A21 入场契约 v1（2026-10-13，本地待集成）
+服务：services/gateway/admission.py；香港游戏服务同机 127.0.0.1:17861。
+认证头 X-OO-Game-Key，只在游戏服务和网关部署环境配置；玩家/启动器不得持有。
+上游 OO_PLATFORM_URL 使用 TLS 正常证书校验；OO_PLATFORM_GATEWAY_KEY 是平台专用消费密钥；可配置 OO_PLATFORM_CA_FILE 指定受信私有 CA，不关闭证书校验。
+
+1. Game server 在创建每个真实客户端连接时生成随机 UUID connection_id（小写标准 D 格式），由服务器持有并随断开销毁，绝不能信任客户端传入。连接对象必须只允许一个登录任务运行。
+2. POST /internal/v1/admissions/prepare JSON {connection_id,uid,ticket}。
+网关在 SQLite 保存 connection_id、启动代号、票据 SHA256、随机 request_id、uid、状态。上游 POST consume 的 request_id 持久稳定；503/超时后同连接重试保留 request_id，不另造消费。
+成功返回 {ok:true,connection_id,uid,game_account_id,game_login_name,realm_id:"hk",admission_id}。
+ready 结果仅可在同原连接、同票据、同 UID、60秒内回查。换连接票据重放拒绝。
+3. 游戏服务按 game_account_id 查本地账号并严格核对 m_id==uid==game_login_name，不自动建号，不按名称兜底到另一个 ID；检查连接仍活跃且仍是同一登录任务。
+4. POST /internal/v1/admissions/claim JSON {connection_id,admission_id}。只有首次 ready→claimed 成功（200相同绑定响应）；再次 claim 返回409。游戏服务仅在该次 claim 确定200、连接仍有效时绑定唯一游戏session。claim超时/响应丢失不能重试建立游戏session，关闭本连接，玩家重取新票据重登。
+5. 断开或登录失败 POST /internal/v1/admissions/close {connection_id}，使 pending/ready 作废。即使 close 失败，游戏服务自身仍需禁止旧回调绑定新连接。
+
+网关重启不会重新分配旧记录：boot 变化，所有旧连接对应记录均拒绝；同票据新连接也拒绝。每条记录可用期至创建后60秒。数据库只存票据hash和非秘密绑定响应，不存票据原文。禁止恢复旧网关库后直接开放，需要平台recovery_epoch与恢复流程同步。
+返回：401票据/绑定错误；403服务密钥错误；409pending/已用/连接失效；503依赖失败。前端维护公告不参与准入。
+本契约保证网关claim至多一次；游戏session单次绑定和旧连接回调隔离必须由S4A21线实现。尚未完成生产部署或真实入场验收。

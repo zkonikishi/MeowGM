@@ -1,0 +1,29 @@
+[Unit]
+Description=Arad S4A21 admission adapter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=oo-admission
+Group=oo-admission
+WorkingDirectory=/opt/oo-admission
+EnvironmentFile=/etc/oo-admission/environment
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=OO_ADMISSION_DATA=/var/lib/oo-admission
+ExecStart=/usr/bin/python3 /opt/oo-admission/admission.py
+Restart=on-failure
+RestartSec=5
+StateDirectory=oo-admission
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/oo-admission
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

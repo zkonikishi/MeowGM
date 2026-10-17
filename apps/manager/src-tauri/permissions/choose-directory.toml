@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-choose-package-directory"
+description = "Allow the local management window to open the distribution folder picker."
+commands.allow = ["choose_package_directory", "choose_pvf_file", "choose_pvf_key", "manager_open_pvf", "manager_window_action", "manager_about", "manager_check_update", "manager_download_update", "manager_open_update", "manager_open_publication"]

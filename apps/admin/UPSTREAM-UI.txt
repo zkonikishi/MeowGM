@@ -1,0 +1,7 @@
+GM 界面来源：https://gitgud.io/yh9/115us-dfolauncher
+本地参考提交：2e80468daec25820beaf3d6eceea79a40c6dda31
+复用：internal/appui/ui/index.html 中 GM 窗口结构、app.css、gm.css、gm-difficulty.css。
+适配层：gm-adapter.js 与 gm-adapter.css，接入 MeowGM 的本地窗口认证、服务器配置与只读数据接口。未接通的上游控制按钮禁用，不加载上游 RPC 脚本。
+
+MOD 控制工具：同一上游仓库 cmd/modkit 源码编译，内嵌于管理器；启停调用 mods enable/disable。
+原生 GM：同一固定提交 gm/cmd/gmtool 编译后内嵌，MeowGM 通过受限 stdio 白名单接入。manager-character.js 接入技能点与回执，其他未验收功能保持禁用。合成 SQLite 测试不等于真实 PVF/游戏验收。

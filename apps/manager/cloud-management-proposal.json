@@ -1,0 +1,21 @@
+{
+  "status": "proposal-not-negotiated",
+  "version": 1,
+  "network_requests_enabled": false,
+  "server_owner_confirmation": "2026-10-16: no actual 115US management HTTPS endpoint/auth/scopes available; player controlled-tls-v1 is not GM authentication",
+  "endpoints": null,
+  "authentication": {
+    "required": "independent short-lived administrative credential; issuance and scope names await owner agreement",
+    "forbidden": ["player assertion", "MariaDB credentials", "SSH root credentials", "upstream loopback gmtool exposed publicly"],
+    "storage": "no credential field in current GUI; future credential must use current-user DPAPI, never URL/query/logs"
+  },
+  "binding_requirements": ["signed service identity", "deployment identity", "realm", "productMode general/custom", "protocol version", "explicit capability allowlist", "request and receipt IDs"],
+  "capability_proposal": {
+    "initial": ["identity and capability discovery", "read-only character summary", "read-only administrative receipts"],
+    "later_separate_grants": ["SP/TP mutation with idempotency and audit", "read-only redacted logs"],
+    "excluded": ["arbitrary SQL", "shell commands", "raw database access", "game process control", "restore", "plugin installation"]
+  },
+  "transport_requirements": ["HTTPS with normal certificate verification", "no redirects or credential forwarding", "bounded body and timeout", "reject unknown protocol/capabilities", "no failed-request fallback to local database", "no automatic connect or retry mutations"],
+  "review_owners": ["control center", "host", "website/admin authentication", "MeowGM"],
+  "production_verified": false
+}

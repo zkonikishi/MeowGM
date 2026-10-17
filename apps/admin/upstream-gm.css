@@ -1,0 +1,565 @@
+#page-gm { position: relative; background: #111820; padding: 20px; min-height: 100%; }
+.gm-window body { background: #111820; display: flex; flex-direction: column; }
+.gm-window #sidenav, .gm-window #logpanel, .gm-window #authorNote, .gm-window #pill { display: none; }
+.gm-window #main { padding: 0 12px 12px; flex: 1; height: auto; min-height: 0; }
+.gm-window #titlebar { flex-shrink: 0; }
+.gm-window #content { min-height: 0; }
+.gm-window #page-gm { min-height: 0; overflow: hidden; display: flex; padding: 16px; gap: 12px; }
+.gm-window .page:not(#page-gm) { display: none; }
+.gm-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0; }
+.gm-heading h1 { font-size: 21px; margin: 0 0 6px; }
+.gm-heading span, .gm-note, #gmBasketTarget { color: #a0acbc; font-size: 12px; line-height: 1.7; }
+/* 顶栏状态改成浮动 toast：不占布局、3 秒自动消失，点击可立即关闭。 */
+#gmStatus { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 40; margin: 0; padding: 10px 16px; max-width: min(620px, calc(100% - 32px)); background: #1b2632; border: 1px solid #35455a; border-left: 3px solid var(--accent); border-radius: 8px; box-shadow: 0 10px 28px rgba(0, 0, 0, .55); color: #e8edf4; font-size: 12.5px; line-height: 1.7; white-space: pre-wrap; user-select: text; max-height: 40vh; overflow: auto; cursor: pointer; animation: gm-toast-in .16s ease-out; }
+#gmStatus[hidden] { display: none; }
+#gmStatus[data-error="true"] { border-color: #7a3a3a; border-left-color: #ff7070; color: #ffc3c3; }
+@keyframes gm-toast-in { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.gm-layout { display: grid; grid-template-columns: minmax(0, 1fr) clamp(190px, 16vw, 240px); min-height: 0; flex: 1; gap: 18px; }
+/* 隐藏发放清单时收掉第三列，宽度让给内容区。 */
+.gm-layout[data-inspector="off"] { grid-template-columns: minmax(0, 1fr); }
+#gmGlobalTarget { display: none; }
+.gm-window #gmGlobalTarget { display: flex; align-items: center; gap: 9px; min-width: 0; flex: 0 1 580px; margin-left: 14px; }
+#gmGlobalTarget label { flex-shrink: 0; color: #9aabbd; font-size: 12px; }
+#gmGlobalTarget select { color-scheme: dark; height: 34px; min-width: 0; background: #17222e; color: #e8edf4; border: 1px solid #344353; border-radius: 6px; padding: 5px 9px; font: inherit; font-size: 13px; }
+#gmGlobalTarget select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#gmGlobalTarget .gm-select[data-field="gmAccount"] { flex: 0 1 155px; width: 155px; }
+#gmGlobalTarget .gm-select[data-field="gmStudioRole"] { flex: 1 1 270px; width: 270px; }
+.gm-window .tb-brand, .gm-window .tb-actions { flex-shrink: 0; }
+.gm-window #tbDrag { min-width: 32px; }
+@media (max-width: 900px) {
+  .gm-window #titlebar { flex-wrap: wrap; height: auto; min-height: 62px; padding-top: 8px; padding-bottom: 10px; }
+  .gm-window #gmGlobalTarget { order: 3; flex-basis: 100%; margin-left: 0; }
+}
+.gm-roster { border-right: 1px solid #2b3643; padding-right: 14px; min-height: 0; overflow: auto; }
+#page-gm label { display: grid; gap: 7px; color: #bfcad7; font-size: 12px; }
+#page-gm input, #page-gm select { background: #17222e; color: #e8edf4; border: 1px solid #344353; border-radius: 5px; padding: 8px; min-width: 0; width: 100%; }
+#page-gm input:focus-visible, #page-gm select:focus-visible, #page-gm button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gm-roster select { margin: 8px 0 22px; }
+.gm-roster input { margin: 8px 0; }
+.gm-roles { display: grid; align-content: start; gap: 3px; max-height: 550px; overflow: auto; }
+.gm-role { text-align: left; padding: 11px 8px; background: transparent; color: #c8d4e4; border: 0; border-radius: 4px; cursor: pointer; transition: background .12s; }
+.gm-role:hover, .gm-role.active { background: #243a4b; }
+.gm-role small { display: block; color: #91a4b7; padding-top: 4px; }
+.gm-workspace { min-width: 0; min-height: 0; display: flex; flex-direction: column; container-type: inline-size; }
+#gmTarget { font-weight: 600; padding: 10px 14px; background: #17202b; border: 1px solid #2b3643; border-radius: 8px; margin-bottom: 16px; }
+.gm-tabs { display: flex; gap: 3px; flex-wrap: wrap; flex-shrink: 0; border-bottom: 1px solid #344353; margin-bottom: 12px; }
+.gm-tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; color: #9aabbd; padding: 9px 10px; cursor: pointer; }
+.gm-tabs button.active { color: #e7f4ff; border-bottom-color: var(--accent); }
+.gm-pane { animation: gm-reveal .15s ease-out; min-height: 0; flex: 1; overflow: auto; }
+.gm-material-heading { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.gm-material-heading .btn { flex-shrink: 0; }
+.gm-material-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.gm-material-card { border: 1px solid #2b3643; border-radius: 9px; padding: 14px; background: #151d25; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "title title" "amount save" "note note"; justify-items: start; gap: 10px; }
+.gm-material-card .gm-material-title { grid-area: title; }
+.gm-material-card > label { grid-area: amount; }
+.gm-material-card > button { grid-area: save; align-self: end; }
+.gm-material-title { display: flex; align-items: center; gap: 12px; }
+.gm-material-title h3 { font-size: 13px; margin: 0; }
+.gm-material-icon { width: 38px; height: 38px; display: grid; place-items: center; background: #111820; border: 1px solid #344353; border-radius: 6px; }
+.gm-material-icon img { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
+#page-gm .gm-material-card input { width: min(150px, 100%); }
+.gm-material-card .gm-note { grid-area: note; margin: 0; }
+.gm-material-more { margin-top: 12px; }
+.gm-material-more summary { cursor: pointer; color: #bfcad7; padding: 8px 0 12px; }
+#gmMaterialsStatus { margin: 8px 0 12px; }
+.gm-material-heading .gm-note { margin: 0 0 6px; }
+@media (max-width: 1100px) { .gm-material-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 680px) { .gm-material-grid { grid-template-columns: minmax(0, 1fr); } }
+.gm-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; gap: 10px; border-top: 1px solid #2b3643; padding: 12px 0; }
+.gm-form h2 { grid-column: 1 / -1; }
+#page-gm h2 { font-size: 14px; margin: 0 0 12px; }
+.gm-filters { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
+.gm-table-wrap { overflow: auto; max-height: 490px; margin-top: 12px; }
+.gm-table { width: 100%; border-collapse: collapse; font-size: 12px; user-select: text; }
+.gm-table th { position: sticky; top: 0; background: #1b2632; color: #abbccc; text-align: left; font-weight: 500; }
+.gm-table th, .gm-table td { padding: 10px 8px; border-bottom: 1px solid #263341; overflow-wrap: anywhere; }
+.gm-table tbody tr:hover { background: #1b2a38; }
+.gm-table .btn { padding: 5px 9px; white-space: nowrap; }
+.gm-quest-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.gm-quest-heading .btn { flex-shrink: 0; }
+.gm-quest-heading .gm-note { margin: 0 0 16px; }
+.gm-quest-filters { display: grid; grid-template-columns: minmax(180px, 1fr) 170px 150px; gap: 10px; }
+.gm-quest-toolbar, .gm-quest-pagination, .gm-quest-row-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gm-quest-toolbar { margin-top: 12px; }
+.gm-quest-pagination { padding-top: 14px; }
+#gmQuests:not([hidden]) { display: flex; flex-direction: column; }
+#gmQuests > :not(.gm-table-wrap) { flex-shrink: 0; }
+#gmQuests .gm-table-wrap { flex: 1; min-height: 0; max-height: none; }
+.gm-quest-table td { vertical-align: top; }
+.gm-quest-table th:nth-child(2) { width: 24%; }
+.gm-quest-table th:nth-child(5) { width: 27%; }
+.gm-quest-table small { display: block; margin-top: 5px; }
+#page-gm .gm-quest-table input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
+.gm-quest-table details { min-width: 100px; max-width: 440px; }
+.gm-quest-table summary { cursor: pointer; color: #b7d4ec; }
+.gm-quest-table details p { white-space: pre-wrap; line-height: 1.7; }
+.gm-quest-status { white-space: nowrap; }
+.gm-quest-status.is-ready { color: #80d7b0; }
+.gm-quest-warning { color: #edbc80; }
+@media (max-width: 850px) { .gm-quest-filters { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .gm-quest-filters > input { grid-column: 1 / -1; } .gm-quest-table { min-width: 740px; } }
+.gm-pagination, .gm-actions { display: flex; gap: 12px; align-items: center; justify-content: flex-end; margin-top: 14px; }
+.gm-inspector { border-left: 1px solid #2b3643; padding-left: 16px; min-height: 0; overflow: auto; }
+.gm-inspector > .btn { width: 100%; margin-top: 10px; }
+.gm-inspector-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.gm-inspector-heading h2 { margin: 0; min-width: 0; }
+.gm-inspector-heading .btn { flex: 0 0 auto; font-size: 11px; }
+#gmBasket { max-height: 300px; overflow: auto; margin: 18px 0; }
+.gm-basket-item { padding: 10px 0; border-bottom: 1px solid #2b3643; font-size: 12px; }
+.gm-basket-item div { display: flex; gap: 6px; margin-top: 8px; }
+.gm-empty { text-align: center; padding: 28px !important; color: #91a4b7; }
+#gmConfirm { max-width: 580px; width: calc(100% - 40px); background: #17222e; color: #e8edf4; border: 1px solid #46586b; border-radius: 8px; padding: 24px; }
+#gmConfirm::backdrop { background: #000a; }
+#gmConfirmText { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 50vh; overflow: auto; font: inherit; line-height: 1.8; }
+#gmEquipmentDialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 24px; border: 1px solid #344353; border-radius: 8px; background: #171e26; color: #e8edf4; }
+#gmEquipmentDialog::backdrop { background: #000a; }
+#gmEquipmentTarget { margin: 16px 0 22px; overflow-wrap: anywhere; }
+#gmEquipmentForm > label { display: block; margin: 14px 0; }
+#gmEquipmentFields:not([hidden]) { margin-top: 14px; }
+#gmEquipmentHint { margin-top: 18px; }
+#gmEquipmentError { color: #ffc3c3; white-space: pre-wrap; overflow-wrap: anywhere; }
+#gmEquipmentDialog .gm-actions { margin-top: 24px; }
+.gm-history-dialog { width: min(720px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 24px; border: 1px solid #344353; border-radius: 8px; background: #171e26; color: #e8edf4; }
+.gm-history-dialog::backdrop { background: #000a; }
+.gm-history-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.gm-history-heading h2 { margin: 0; font-size: 18px; }
+.gm-history-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; margin: 18px 0 12px; }
+.gm-history-toolbar label { display: grid; gap: 6px; flex: 1 1 260px; font-size: 12px; color: #98a9bc; }
+.gm-history-rows { display: grid; gap: 6px; max-height: 48vh; overflow: auto; padding: 2px; }
+.gm-history-row { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px; border: 1px solid #2b3643; border-radius: 6px; background: #121a23; }
+.gm-history-row:hover { border-color: #45607d; background: #18232e; }
+.gm-history-row input { width: 16px; height: 16px; margin: 2px 0 0; accent-color: #4b9bea; }
+.gm-history-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-width: 0; }
+.gm-history-title strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.gm-history-title time { flex: 0 0 auto; color: #8194a8; font-size: 11px; font-variant-numeric: tabular-nums; }
+.gm-history-meta { margin-top: 4px; color: #9cafc1; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.gm-history-dialog .gm-actions { margin-top: 16px; }
+@keyframes gm-reveal { from { opacity: .5; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+/* 内容区足够宽时，资产与成长并排；缩小后自然恢复纵向排列。 */
+#gmCatalog:not([hidden]), #gmData:not([hidden]) { display: flex; flex-direction: column; }
+#gmCatalog .gm-table-wrap, #gmData .gm-table-wrap { flex: 1; min-height: 0; max-height: none; }
+.gm-filters, .gm-pagination, #gmDataSearch, #gmData > .gm-form { flex-shrink: 0; }
+#gmTarget { flex-shrink: 0; }
+/* 角色进阶：4 个蓝色功能按钮，参数在弹窗里填写。 */
+.gm-advance { padding: 2px 0 18px; margin-bottom: 18px; border-bottom: 1px solid #2b3643; }
+.gm-advance h2 { margin-bottom: 14px; }
+.gm-advance-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.gm-advance-btn { min-height: 40px; padding: 0 20px; background: linear-gradient(180deg, #3d84cf, #2b6cb4); color: #f2f7ff; border: 1px solid #1f5490; border-radius: 6px; font-size: 14px; font-weight: 600; letter-spacing: .5px; cursor: pointer; transition: filter .15s ease, transform .1s ease; }
+.gm-advance-btn:hover { filter: brightness(1.12); }
+.gm-advance-btn:active { transform: translateY(1px); }
+.gm-advance-btn:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.4); }
+.gm-advance > .gm-note { margin: 14px 0 0; }
+/* 角色属性：卡片式信息块。 */
+.gm-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.gm-card { display: grid; gap: 10px; align-content: start; background: #17202b; border: 1px solid #2b3643; border-radius: 8px; padding: 16px; }
+.gm-card h2 { margin: 0; }
+.gm-card .gm-note { margin: 0; }
+.gm-card-value { margin: 0; font-size: 17px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.gm-card > .btn { justify-self: start; }
+.gm-card-row { display: flex; align-items: end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.gm-card-row > div { flex: 1 1 300px; }
+.gm-card-row > label { flex: 0 1 240px; }
+#page-gm .btn-blue { background: linear-gradient(180deg, #3d84cf, #2b6cb4); color: #f2f7ff; border: 1px solid #1f5490; }
+#page-gm .btn-blue:hover { background: linear-gradient(180deg, #4a92dd, #3178c4); }
+#page-gm .btn-danger { background: linear-gradient(180deg, #bb4d48, #953430); color: #fff5f5; border: 1px solid #782824; }
+#page-gm .btn-danger:hover { background: linear-gradient(180deg, #cb5b56, #a63c37); }
+#gmProfessionDialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 24px; border: 1px solid #344353; border-radius: 8px; background: #171e26; color: #e8edf4; }
+#gmProfessionDialog::backdrop { background: #000a; }
+.gm-profession-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+#page-gm #gmProfessionTitle { margin: 0; font-size: 18px; }
+#gmProfessionClose { padding: 8px 12px; }
+#gmProfessionTarget { margin: 16px 0 32px; overflow-wrap: anywhere; }
+.gm-profession-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+#gmProfessionHelp { margin: 32px 0 16px; line-height: 1.8; }
+.gm-profession-hint { color: #ffd166; margin: 0; line-height: 1.8; }
+#gmProfessionError { color: #ffc3c3; white-space: pre-wrap; overflow-wrap: anywhere; }
+#gmProfessionDialog .gm-actions { margin-top: 24px; }
+#gmAdvanceDialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 24px; border: 1px solid #344353; border-radius: 8px; background: #171e26; color: #e8edf4; }
+#gmAdvanceDialog::backdrop { background: #000a; }
+.gm-advance-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+#page-gm #gmAdvanceTitle { margin: 0; font-size: 18px; }
+#gmAdvanceClose { padding: 8px 12px; }
+#gmAdvanceTarget { margin: 16px 0 24px; overflow-wrap: anywhere; }
+.gm-advance-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+#gmAdvanceDialog #gmEquipmentStatus { margin: 16px 0 0; }
+#gmAdvanceHelp { color: #a0acbc; font-size: 12px; margin: 24px 0 12px; line-height: 1.8; }
+.gm-advance-hint { color: #ffd166; margin: 0; line-height: 1.8; }
+#gmAdvanceError { color: #ffc3c3; white-space: pre-wrap; overflow-wrap: anywhere; }
+#gmAdvanceDialog .gm-actions { margin-top: 24px; }
+@media (max-width: 540px) { .gm-profession-fields, .gm-advance-fields { grid-template-columns: minmax(0, 1fr); } }
+/* 背包装备：图标网格 + 分类筛选 + 详情面板 */
+.gm-bag-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex-shrink: 0; margin-bottom: 12px; }
+.gm-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1 1 auto; }
+.gm-chip { padding: 5px 10px; background: #1b2632; color: #a9b8c9; border: 1px solid #2b3643; border-radius: 999px; font-size: 12px; cursor: pointer; }
+.gm-chip:hover { background: #22303e; }
+.gm-chip.active { background: #2b6cb4; border-color: #1f5490; color: #f2f7ff; }
+#gmBagSearch { flex: 0 1 200px; }
+.gm-view-toggle { display: flex; gap: 4px; }
+.gm-view-toggle .btn.active { background: #2b6cb4; border-color: #1f5490; color: #f2f7ff; }
+.gm-bag-body { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 16px; min-height: 0; align-items: start; }
+.gm-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; align-content: start; }
+.gm-tile { position: relative; min-width: 0; background: #141c25; border: 1px solid #263341; border-radius: 8px; }
+.gm-tile-select { display: grid; width: 100%; height: 100%; min-width: 0; gap: 4px; justify-items: center; padding: 8px 4px; background: transparent; border: 0; border-radius: inherit; cursor: pointer; font: inherit; }
+.gm-bag-actions { display: flex; justify-content: flex-end; gap: 2px; }
+.gm-tile > .gm-bag-actions { position: absolute; top: 2px; right: 2px; }
+.gm-tile > .gm-bag-actions .gm-bag-action { width: 16px; height: 16px; padding: 2px; border-radius: 3px; background: #142230ed; }
+.gm-tile > .gm-bag-actions .gm-bag-action svg { width: 12px; height: 12px; }
+.gm-bag-action { display: grid; place-items: center; width: 24px; height: 24px; padding: 3px; border: 0; border-radius: 4px; background: #1c2936; color: #a7c9e9; cursor: pointer; }
+.gm-bag-action svg { width: 15px; height: 15px; pointer-events: none; }
+.gm-bag-action:hover { background: #2a4967; color: #e5f3ff; }
+.gm-bag-action-delete { color: #df9b9b; }
+.gm-bag-action-delete:hover { background: #622b32; color: #ffe5e5; }
+.gm-bag-action:focus-visible, .gm-tile-select:focus-visible { outline: 2px solid #74bcff; outline-offset: 1px; }
+.gm-bag-action:disabled { opacity: .45; cursor: not-allowed; }
+.gm-tile:hover { border-color: #3d84cf; background: #18222c; }
+.gm-tile.active { border-color: var(--accent); background: #1b2a38; }
+.gm-tile-icon { position: relative; width: 44px; height: 44px; display: grid; place-items: center; background: #0d1319; border-radius: 6px; }
+.gm-tile-icon img { width: 44px; height: 44px; image-rendering: pixelated; }
+.gm-tile-count { position: absolute; right: -2px; bottom: -2px; padding: 0 4px; background: #1b2632; border: 1px solid #3a4a5c; border-radius: 6px; font-size: 11px; color: #e8edf4; font-variant-numeric: tabular-nums; }
+.gm-tile-name { width: 100%; text-align: center; font-size: 11px; line-height: 1.3; color: #b9c7d6; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.gm-bag-detail { border: 1px solid #344353; border-radius: 10px; padding: 16px; min-height: 0; background: #151e28; box-shadow: 0 6px 18px #0002; user-select: text; }
+.gm-bag-detail-heading { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid #2b3643; }
+#page-gm .gm-bag-detail h2 { font-size: 13px; line-height: 1.6; margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.gm-bag-detail-heading .gm-detail-icon { flex-shrink: 0; border: 1px solid #344353; }
+.gm-bag-detail .gm-detail-list { gap: 10px 12px; margin-top: 16px; line-height: 1.5; }
+.gm-bag-detail .gm-detail-list dd { font-variant-numeric: tabular-nums; }
+.gm-bag-detail .gm-copy-item-id { width: 100%; margin-top: 18px; }
+.gm-bag-edit-dialog { width: min(380px, calc(100% - 32px)); box-sizing: border-box; max-height: calc(100% - 32px); overflow: auto; padding: 24px; background: #17222e; color: #e8edf4; border: 1px solid #46586b; border-radius: 8px; }
+.gm-bag-edit-dialog::backdrop { background: #000a; }
+.gm-bag-edit-dialog h2 { margin: 0 0 12px; font-size: 18px; }
+.gm-bag-edit-target { white-space: pre-line; overflow-wrap: anywhere; line-height: 1.6; font-size: 12px; }
+.gm-bag-edit-dialog .gm-note { margin: 0; line-height: 1.6; }
+.gm-bag-edit-dialog .gm-actions { margin-top: 12px; }
+.gm-bag-quantity { display: grid; gap: 8px; }
+.gm-bag-quantity label { display: grid; gap: 6px; font-size: 12px; }
+.gm-bag-quantity input { width: 100%; min-width: 0; box-sizing: border-box; }
+.gm-detail-icon { width: 44px; height: 44px; image-rendering: pixelated; background: #0d1319; border-radius: 6px; }
+.gm-detail-list { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; margin: 12px 0 0; font-size: 12px; }
+.gm-detail-list dt { color: #98a9bc; }
+.gm-detail-list dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 900px) { .gm-bag-body { grid-template-columns: minmax(0, 1fr); } }
+
+/* 目录页：左侧分类树 + 右侧搜索行与带图标的表格 */
+/* 关键：.gm-pane 本身 overflow:auto，若不把高度约束链打通，表格撑高整页 →
+   左树和工具栏会一起滚走。这里让 #gmCatalog 只管布局不滚动，滚动落到表格区。 */
+#page-gm #gmCatalog { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.gm-cat-body { display: grid; grid-template-columns: 190px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 14px; flex: 1; min-height: 0; }
+.gm-cat-tree { border-right: 1px solid #2b3643; padding-right: 10px; overflow-y: auto; min-height: 0; }
+.gm-tree-group { margin: 10px 0 4px; font-size: 11px; color: #7d8fa3; letter-spacing: .04em; }
+.gm-tree-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; padding: 6px 8px; background: transparent; border: 1px solid transparent; border-radius: 6px; color: #b9c7d6; font: inherit; font-size: 12px; text-align: left; cursor: pointer; }
+.gm-tree-item em { color: #7d8fa3; font-style: normal; font-variant-numeric: tabular-nums; }
+.gm-tree-item:hover { background: #1b2632; }
+.gm-tree-item.active { background: #2b6cb4; border-color: #1f5490; color: #f2f7ff; }
+.gm-tree-item.active em { color: #d6e6fb; }
+.gm-tree-all { font-weight: 600; margin-bottom: 2px; }
+.gm-tree-child { padding-left: 18px; }
+/* 道具按实际类型筛选，职业和等级仅用于装备页面。 */
+#gmCatalog[data-catalog="items"] .gm-lv,
+#gmCatalog[data-catalog="items"] .gm-select[data-field="job"],
+#gmCatalog[data-catalog="items"] select[name="job"] { display: none; }
+#gmCatalog[data-catalog="pets"] .gm-lv,
+#gmCatalog[data-catalog="pets"] .gm-select[data-field="job"],
+#gmCatalog[data-catalog="pets"] select[name="job"] { display: none; }
+#gmCatalog[data-catalog="items"] .gm-tree-item { padding: 4px 8px; align-items: flex-start; }
+#gmCatalog[data-catalog="items"] .gm-tree-item span { min-width: 0; overflow-wrap: anywhere; }
+#gmCatalog[data-catalog="items"] .gm-tree-item em { flex-shrink: 0; }
+.gm-cat-main { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+/* 工具栏与分页不参与压缩，保证一直可见 */
+#page-gm #gmCatalog .gm-cat-search,
+#page-gm #gmCatalog .gm-pagination { flex-shrink: 0; }
+/* 搜索工具栏：必须带 #page-gm 前缀，否则压不过上面那条 "#page-gm input,select{width:100%}"，
+   下拉框会被撑满整行、Lv 输入框会竖着堆。
+   不换行（nowrap）：否则"共 N 个匹配 · 已筛选：…"一长就掉到下一行，工具栏高度跟着跳。 */
+#page-gm .gm-cat-search { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+#page-gm .gm-cat-search input[name="q"] { flex: 1 1 260px; width: auto; min-width: 110px; }
+#page-gm .gm-cat-search .gm-lv { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; color: #98a9bc; font-size: 12px; white-space: nowrap; }
+#page-gm .gm-cat-search .gm-lv input { flex: 0 0 72px; width: 72px; padding: 6px 8px; text-align: center; }
+#page-gm .gm-cat-search select { flex: 0 0 auto; width: auto; min-width: 118px; }
+#page-gm .gm-cat-search button { flex: 0 0 auto; }
+#page-gm .gm-cat-search .gm-cat-count { margin-left: auto; color: #8fa2b6; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 行内数量与分页控件：同样必须带 #page-gm 前缀。 */
+#page-gm .gm-col-amount { width: 76px; }
+#page-gm .gm-col-select { width: 32px; text-align: center; }
+#page-gm .gm-catalog-check { width: 16px; height: 16px; margin: 0; padding: 0; vertical-align: middle; accent-color: #4b9bea; cursor: pointer; }
+#page-gm .gm-catalog-check:disabled { cursor: default; }
+#page-gm .gm-cat-table tr[data-selected="true"] { background: #20364b; }
+#page-gm .gm-catalog-bulk { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; flex-shrink: 0; color: #aebfd0; font-size: 12px; }
+#page-gm .gm-catalog-bulk .gm-note { margin: 0; }
+#page-gm .gm-row-amount { width: 68px; padding: 5px 6px; text-align: center; }
+#page-gm .gm-col-ops { width: 208px; white-space: nowrap; }
+#page-gm .gm-col-ops .btn { margin-right: 4px; }
+#page-gm .gm-pagination { flex-wrap: wrap; }
+#page-gm .gm-page-nav { display: inline-flex; align-items: center; gap: 6px; }
+#page-gm .gm-page-jump, #page-gm .gm-page-size { display: inline-flex; align-items: center; gap: 6px; color: #98a9bc; font-size: 12px; white-space: nowrap; }
+#page-gm .gm-page-jump input { width: 68px; padding: 5px 6px; text-align: center; }
+#page-gm .gm-page-size select { width: auto; min-width: 92px; }
+/* 下拉框自绘：原生 select 在深色界面上是系统灰箭头 + 系统配色，而且默认没有手型光标。
+   这里去掉原生外观、自己画箭头（页面没有 CSP 限制，data URI 可用），并补上悬停手型。
+   展开后的列表由 Chromium 绘制，配合 :root 的 color-scheme: dark 已是深色，
+   那一部分是唯一无法进一步自定义的地方（浏览器限制，不是没写）。 */
+#page-gm select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding: 8px 30px 8px 10px;
+  border: 1px solid #344353;
+  border-radius: 6px;
+  background-color: #17222e;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%2398a9bc' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color .12s, background-color .12s;
+}
+#page-gm select:hover { border-color: #45607d; background-color: #1c2836; }
+#page-gm select:focus { border-color: var(--accent); outline: none; }
+#page-gm select:disabled { opacity: .5; cursor: not-allowed; }
+#page-gm select option { background: #17222e; color: #e8edf4; }
+
+/* ---- 自绘下拉组件：按钮 + listbox（原生 select 只做视觉隐藏，仍在表单里）---- */
+:is(#page-gm, #gmGlobalTarget) .gm-select { position: relative; display: flex; width: 100%; min-width: 0; }
+:is(#page-gm, #gmGlobalTarget) .gm-select-native { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+:is(#page-gm, #gmGlobalTarget) .gm-select-btn { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 34px; padding: 0 10px; background: #17222e; color: #e8edf4; border: 1px solid #344353; border-radius: 6px; font: inherit; font-size: 13px; text-align: left; cursor: pointer; transition: border-color .12s, background-color .12s; }
+:is(#page-gm, #gmGlobalTarget) .gm-select-btn:hover { border-color: #45607d; background: #1c2836; }
+:is(#page-gm, #gmGlobalTarget) .gm-select-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:is(#page-gm, #gmGlobalTarget) .gm-select-btn[aria-expanded="true"] { border-color: var(--accent); }
+:is(#page-gm, #gmGlobalTarget) .gm-select-btn:disabled { opacity: .5; cursor: not-allowed; }
+:is(#page-gm, #gmGlobalTarget) .gm-select-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:is(#page-gm, #gmGlobalTarget) .gm-select-caret { flex: 0 0 auto; width: 9px; height: 6px; color: #98a9bc; background: currentColor; clip-path: polygon(50% 100%, 0 0, 100% 0); transition: transform .15s; }
+:is(#page-gm, #gmGlobalTarget) .gm-select-btn[aria-expanded="true"] .gm-select-caret { transform: rotate(180deg); }
+/* 面板挂在 body / 对话框上，所以这几个类名不带 :is(#page-gm, #gmGlobalTarget) 前缀 */
+.gm-select-panel { position: fixed; z-index: 60; max-height: 320px; overflow: auto; overscroll-behavior: contain; padding: 4px; background: #121a24; border: 1px solid #35455a; border-radius: 8px; box-shadow: 0 12px 30px rgba(0, 0, 0, .55); }
+.gm-select-option { padding: 7px 10px; border-radius: 6px; color: #c8d4e4; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.gm-select-option:hover, .gm-select-option.active { background: #1e2c3b; color: #f2f7ff; }
+.gm-select-option.selected { color: #7cc8ff; font-weight: 600; }
+/* 选中标记：内联 data-URI 的 SVG 勾（离线可用、跟随 currentColor、不依赖字体）。
+   用 mask 而不是 background-image，颜色才能跟着文字颜色走；也不能用 sprite —— mask 无法跨文档引用 <use>。 */
+.gm-select-option.selected::after {
+  content: '';
+  float: right;
+  width: 13px; height: 13px;
+  margin-left: 14px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6.5 9.2 17.3 4 12.1'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6.5 9.2 17.3 4 12.1'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.gm-select-option.disabled { color: #5d6c7d; cursor: not-allowed; }
+.gm-select-option.disabled:hover { background: transparent; color: #5d6c7d; }
+/* 工具栏与分页里的下拉保持自适应宽度，别被上面的 width:100% 撑满 */
+#page-gm .gm-cat-search .gm-select { width: auto; flex: 0 0 auto; min-width: 118px; }
+#page-gm .gm-page-size .gm-select { width: auto; min-width: 92px; }
+#page-gm .gm-roster .gm-select { margin: 8px 0 22px; }
+
+/* 史诗（品质4）使用金黄色，传说（品质6）使用橙色；编号沿用源物品数据。
+   两个选择器都要写：表格/网格在 #page-gm 内，而悬停详情卡挂在 body 上（在外面），
+   只写 #page-gm 前缀的话卡片里的名字不会上色。 */
+#page-gm .gm-rar-0, .gm-card-panel .gm-rar-0 { color: #e8edf4; }
+#page-gm .gm-rar-1, .gm-card-panel .gm-rar-1 { color: #6ec1ff; }
+#page-gm .gm-rar-2, .gm-card-panel .gm-rar-2 { color: #b98bff; }
+#page-gm .gm-rar-3, .gm-card-panel .gm-rar-3 { color: #ff7ad9; }
+#page-gm .gm-rar-4, .gm-card-panel .gm-rar-4 { color: #ffd166; }
+#page-gm .gm-rar-5, .gm-card-panel .gm-rar-5 { color: #ff5c5c; }
+#page-gm .gm-rar-6, .gm-card-panel .gm-rar-6 { color: #ffa63d; }
+#page-gm .gm-rar-7, .gm-card-panel .gm-rar-7 { color: #ff4d6d; }
+#page-gm .gm-rar-8, .gm-card-panel .gm-rar-8 { color: #7ef0ff; }
+#page-gm .gm-item-name { font-weight: 500; }
+/* 目录行可悬停看详情，给出手型提示（行本身不点击，点击落在行内按钮上）。 */
+#page-gm .gm-cat-table tbody tr { cursor: pointer; }
+#page-gm .gm-cat-table tbody tr:hover { background: #18222c; }
+
+/* 时装工作室沿用参考页的双栏结构：试衣间 / 时装图鉴。 */
+#page-gm [hidden] { display: none !important; }
+#page-gm.gm-studio-page { background: #101419; gap: 12px; }
+#page-gm.gm-studio-page .gm-heading { min-height: 36px; }
+#page-gm.gm-studio-page .gm-heading h1 { margin: 0; font-size: 18px; }
+#page-gm.gm-studio-page .gm-heading > div > span { display: none; }
+#page-gm .gm-heading-actions { display: flex; align-items: center; gap: 8px; }
+#page-gm .gm-studio-bar .gm-select { width: min(320px, 42vw); }
+#page-gm.gm-studio-page .gm-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; overflow: hidden; }
+#page-gm.gm-studio-page .gm-roster, #page-gm.gm-studio-page #gmTarget { display: none; }
+#page-gm.gm-studio-page .gm-tabs { margin-bottom: 12px; padding: 4px 0 8px; border-color: #29313b; }
+#page-gm.gm-studio-page .gm-tabs button { font-size: 12px; padding: 8px 12px; }
+#page-gm.gm-studio-page .gm-tabs button.active { color: #e5bb69; background: #302b20; border: 1px solid #79633b; border-radius: 4px; }
+#page-gm .gm-studio-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; flex: none; }
+#page-gm .gm-studio-bar > div { display: flex; align-items: baseline; gap: 12px; }
+#page-gm .gm-studio-bar h2 { font-size: 17px; margin: 0; }
+#page-gm .gm-studio-action { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; }
+#page-gm .gm-studio-action .gm-select { width: 76px; }
+#page-gm .gm-studio-action .gm-select-btn { min-height: 28px; padding: 4px 8px; font-size: 11px; }
+#page-gm .gm-cat-body[data-studio="on"] { grid-template-columns: minmax(0, 2.1fr) minmax(360px, 1fr); gap: 16px; }
+#page-gm .gm-cat-body[data-studio="on"] > #gmCatTree,
+#page-gm .gm-cat-body[data-studio="on"] .gm-table-wrap,
+#page-gm .gm-cat-body[data-studio="on"] .gm-lv,
+#page-gm .gm-cat-body[data-studio="on"] .gm-cat-search .gm-select[data-field="job"],
+#page-gm .gm-cat-body[data-studio="on"] #gmCatalogCount,
+#page-gm .gm-cat-body[data-studio="on"] .gm-page-size { display: none; }
+#page-gm #gmStudio { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 0; border: 1px solid #2c333d; border-radius: 6px; overflow: hidden; background: #11171f; }
+#page-gm .gm-studio-title { display: flex; justify-content: space-between; gap: 12px; padding: 12px; background: #181e26; border-bottom: 1px solid #2c333d; font-size: 12px; flex: none; }
+#page-gm .gm-studio-title small { margin-left: 12px; color: #8194a8; font-weight: 400; }
+#page-gm .gm-studio-title > span { font-size: 11px; color: #8194a8; }
+#page-gm .gm-studio-stage { position: relative; flex: 1; min-width: 0; min-height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #11171f; isolation: isolate; touch-action: none; user-select: none; cursor: grab; }
+#page-gm .gm-studio-stage.dragging { cursor: grabbing; }
+#page-gm .gm-studio-stage[data-background="black"] { background: #000; }
+#page-gm .gm-studio-stage[data-background="light"] { background: #e5e7eb; }
+#page-gm .gm-studio-stage[data-background="warm"] { background: #c9bfb1; }
+#page-gm .gm-studio-stage[data-background="blue"] { background: #233b55; }
+#page-gm .gm-studio-stage[data-background="checker-light"] { background: repeating-conic-gradient(#c5c9cf 0% 25%, #e5e7eb 0% 50%) 50% / 24px 24px; }
+#page-gm .gm-studio-stage[data-background="checker-dark"] { background: repeating-conic-gradient(#161f29 0% 25%, #263442 0% 50%) 50% / 24px 24px; }
+#page-gm .gm-studio-stage:is([data-background="light"], [data-background="warm"], [data-background="checker-light"]) .gm-studio-empty { color: #344353; }
+#page-gm .gm-studio-background .gm-select { width: 88px; }
+/* 图层直接与试衣间背景混合，不能在透明的变换容器里先合成，否则加色贴图会留下黑底。 */
+#page-gm .gm-studio-layers { display: contents; pointer-events: none; }
+#page-gm .gm-studio-layer { position: absolute; left: calc(var(--studio-x) + var(--frame-x) * var(--studio-zoom)); top: calc(var(--studio-y) + var(--frame-y) * var(--studio-zoom)); transform: scale(var(--studio-zoom)); transform-origin: 0 0; image-rendering: pixelated; }
+#page-gm .gm-studio-layers.smooth .gm-studio-layer { image-rendering: auto; }
+#page-gm .gm-studio-empty { position: absolute; max-width: 80%; color: #9baaba; font-size: 12px; line-height: 1.7; text-align: center; overflow-wrap: anywhere; }
+#page-gm .gm-studio-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border-top: 1px solid #2c333d; background: #181e26; flex: none; flex-wrap: wrap; }
+#page-gm .gm-studio-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 11px; color: #9aacbd; }
+#page-gm .gm-studio-actions .btn { min-height: 28px; padding: 0 9px; font-size: 11px; border-radius: 4px; background: #243a4c; border-color: #2d465b; }
+#page-gm .gm-studio-smooth { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; }
+#page-gm .gm-studio-smooth input { width: 14px; margin: 0; accent-color: #b49151; }
+#page-gm .gm-studio-hint { margin: 0; font-size: 11px; line-height: 1.6; color: #8fa2b6; }
+#page-gm #gmStudioHint { max-width: 360px; max-height: 48px; overflow: auto; }
+#page-gm .gm-studio-list { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px; max-height: 88px; overflow: auto; flex: none; }
+#page-gm .gm-studio-chip { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; background: #202c38; font-size: 11px; max-width: 220px; }
+#page-gm .gm-studio-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#page-gm .gm-studio-x { flex: none; width: 20px; height: 20px; padding: 0; border-radius: 4px; border: 1px solid #344353; background: #1d2937; color: #c8d4e4; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+/* 试穿条上的删除按钮：图标按按钮内框缩小，别撑满 20px */
+#page-gm .gm-studio-x .ico { width: 10px; height: 10px; stroke-width: 2.4; }
+#page-gm .gm-studio-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; background: #181e26; border-top: 1px solid #2c333d; font-size: 11px; color: #8fa2b6; flex: none; }
+/* 搭配分享码：一行里放"标签 + 输入框 + 三个按钮"。输入框用等宽字体，码是大小写敏感的，
+   从提示行里抄数字符容易抄错；这里让它可选中、可粘贴，按钮只做生成/复制/载入三件事。 */
+#page-gm .gm-studio-share { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: #181e26; border-top: 1px solid #2c333d; flex: none; flex-wrap: wrap; }
+#page-gm .gm-studio-share label { flex: none; font-size: 11px; color: #9aacbd; }
+#page-gm .gm-studio-share input {
+  flex: 1 1 220px; min-width: 0; height: 26px; padding: 0 8px;
+  border: 1px solid #2d465b; border-radius: 4px; background: #101720; color: #d7e2ee;
+  font-family: Consolas, "Courier New", monospace; font-size: 12px; letter-spacing: .4px;
+}
+#page-gm .gm-studio-share input:focus { outline: none; border-color: #b49151; }
+#page-gm .gm-studio-share .btn { min-height: 26px; padding: 0 9px; font-size: 11px; border-radius: 4px; background: #243a4c; border-color: #2d465b; }
+#page-gm.gm-studio-page .btn-blue { background: #277fae; border-color: #2c83b3; border-radius: 4px; }
+#page-gm .gm-cat-body[data-studio="on"] .gm-cat-main { border: 1px solid #2c333d; border-radius: 6px; background: #181e26; gap: 0; overflow: hidden; }
+#page-gm .gm-avatar-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 12px; border-bottom: 1px solid #2c333d; flex: none; }
+#page-gm .gm-avatar-header h2 { margin: 0 0 8px; font-size: 14px; }
+#page-gm .gm-avatar-header span { color: #8fa2b6; font-size: 11px; }
+#page-gm .gm-avatar-controls { --gm-avatar-control-height: 34px; display: flex; align-items: flex-end; gap: 16px; margin-left: auto; max-width: 100%; }
+#page-gm .gm-avatar-job { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin: 0; font-size: 11px; color: #8fa2b6; }
+#page-gm .gm-avatar-job .gm-select { min-width: 136px; }
+#page-gm .gm-avatar-job .gm-select-btn { box-sizing: border-box; height: var(--gm-avatar-control-height); min-height: var(--gm-avatar-control-height); }
+#page-gm .gm-avatar-parts { display: flex; flex-wrap: wrap; gap: 4px; padding: 12px 12px 8px; flex: none; }
+#page-gm .gm-avatar-parts button { font-size: 11px; padding: 5px 7px; border-radius: 3px; border: 1px solid #303b47; background: #101419; color: #9faebd; cursor: pointer; }
+#page-gm .gm-avatar-parts button.active { color: #e5bb69; border-color: #aa8643; background: #302b20; }
+#page-gm .gm-cat-body[data-studio="on"] .gm-cat-search { flex-wrap: wrap; padding: 0 12px 12px; gap: 8px; }
+#page-gm .gm-cat-body[data-studio="on"] input[name="q"] { flex: 1 0 100%; width: 100%; background: #101419; font-size: 12px; }
+#page-gm .gm-cat-body[data-studio="on"] .gm-cat-search .btn { min-height: 28px; font-size: 11px; }
+#page-gm .gm-cat-body[data-studio="on"] .gm-cat-search .gm-select[data-field="rarity"] { min-width: 118px; }
+#page-gm .gm-cat-body[data-studio="on"] .gm-cat-search .gm-select[data-field="rarity"] .gm-select-btn { min-height: 28px; font-size: 11px; }
+#page-gm .gm-avatar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); align-content: start; gap: 8px; padding: 0 8px 8px; flex: 1; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+#page-gm .gm-avatar-card { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; min-height: 116px; padding: 8px; cursor: pointer; font-family: inherit; border: 1px solid #2c333d; border-radius: 5px; background: #101419; }
+#page-gm .gm-avatar-card:hover { border-color: #536272; }
+#page-gm .gm-avatar-card.selected { border-color: #af8b48; background: #22221e; }
+#page-gm .gm-avatar-card.preview-unavailable:not(.selected) { border-style: dashed; }
+#page-gm .gm-avatar-card.preview-unavailable:not(.selected) .gm-btn-try { color: #a7adb5; }
+#page-gm .gm-avatar-card img { width: 32px; height: 32px; border-radius: 4px; image-rendering: pixelated; background: #18222c; }
+#page-gm .gm-avatar-card .gm-avatar-name { font-size: 12px; line-height: 1.5; text-align: center; margin: 0; color: #d6e1ef; overflow-wrap: anywhere; }
+#page-gm .gm-avatar-card .gm-avatar-meta { margin: auto 0 0; font-size: 11px; color: #92a1b1; }
+#page-gm .gm-avatar-card .gm-btn-try { align-self: flex-end; padding: 4px; border: 0; background: transparent; font-size: 11px; color: #dfb256; cursor: pointer; }
+#page-gm .gm-avatar-pick { display: flex; flex: 1; width: 100%; min-width: 0; flex-direction: column; align-items: center; gap: 6px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+#page-gm .gm-avatar-related-link { padding: 3px 6px; align-self: flex-end; border: 0; background: transparent; color: #91bcd3; font-size: 11px; cursor: pointer; }
+#page-gm .gm-avatar-modes { box-sizing: border-box; height: var(--gm-avatar-control-height); flex: none; display: flex; gap: 3px; padding: 3px; border: 1px solid #32485a; border-radius: 7px; }
+#page-gm .gm-avatar-modes button { padding: 0 16px; border: 1px solid transparent; border-radius: 4px; background: #101419; color: #b6c8d7; cursor: pointer; font: inherit; font-size: 12px; }
+#page-gm .gm-avatar-modes button.active { color: #e5bb69; border-color: #aa8643; background: #302b20; }
+#page-gm .gm-avatar-related { margin: 8px 12px; padding: 6px 8px; text-align: left; border: 1px solid #3b596b; border-radius: 4px; background: #172a36; color: #b5d5e7; font: inherit; font-size: 12px; overflow-wrap: anywhere; cursor: pointer; }
+#page-gm .gm-avatar-set-grid { grid-template-columns: minmax(0, 1fr); padding-top: 12px; }
+#page-gm .gm-avatar-set { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; padding: 12px; border: 1px solid #303b47; border-radius: 5px; background: #101419; color: #d6e1ef; text-align: left; cursor: pointer; font: inherit; }
+#page-gm .gm-avatar-set:hover { border-color: #536272; }
+#page-gm .gm-avatar-set.selected { border-color: #bb9246; background: #193c50; }
+#page-gm .gm-avatar-set img { width: 40px; height: 40px; flex: none; image-rendering: pixelated; border: 1px solid #536272; border-radius: 5px; background: #18222c; }
+#page-gm .gm-set-info { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 4px; overflow-wrap: anywhere; }
+#page-gm .gm-set-info strong { font-size: 12px; line-height: 1.5; }
+#page-gm .gm-set-info > span { color: #9eb5c7; font-size: 11px; line-height: 1.5; }
+#page-gm .gm-set-action { flex: none; font-size: 11px; color: #dfb256; }
+#page-gm .gm-avatar-pick:focus-visible, #page-gm .gm-avatar-related-link:focus-visible, #page-gm .gm-avatar-set:focus-visible { outline: 2px solid #b6d9ef; outline-offset: 2px; }
+#page-gm .gm-avatar-empty { grid-column: 1 / -1; padding: 24px; color: #9aacbd; font-size: 12px; }
+#page-gm .gm-cat-body[data-studio="on"] .gm-pagination { margin: 0; padding: 12px; border-top: 1px solid #2c333d; gap: 8px; font-size: 11px; }
+#page-gm .gm-cat-body[data-studio="on"] #gmPage { flex-basis: 100%; color: #91a4b7; }
+#page-gm .gm-cat-body[data-studio="on"] .gm-page-nav { margin-right: auto; }
+#page-gm .gm-cat-body[data-studio="on"] .gm-pagination .btn { padding: 4px 8px; font-size: 11px; }
+#page-gm.gm-studio-page.gm-studio-focus .gm-cat-body { grid-template-columns: minmax(0, 1fr); }
+#page-gm.gm-studio-page.gm-studio-focus .gm-cat-main { display: none; }
+@media (max-width: 1050px) {
+  #page-gm .gm-cat-body[data-studio="on"] { grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr); }
+  #page-gm .gm-studio-title > span { display: none; }
+  #page-gm .gm-studio-bar { flex-wrap: wrap; }
+  #page-gm .gm-studio-bar > div { flex-wrap: wrap; }
+}
+@media (max-width: 760px) {
+  #page-gm.gm-studio-page #gmCatalog { overflow: auto; }
+  #page-gm .gm-cat-body[data-studio="on"] { grid-template-columns: minmax(0, 1fr); grid-template-rows: 480px 640px; flex: none; }
+  #page-gm .gm-studio-bar .gm-select { width: 220px; }
+  #page-gm .gm-studio-footer { flex-wrap: wrap; }
+}
+
+/* 悬停详情卡：挂在 body 上（所以类名不带 #page-gm 前缀），fixed 定位不被表格裁切。
+   卡片可交互（鼠标能移到上面、内容长了可以滚轮滚），所以不用 pointer-events:none；
+   改由"离开行延迟关闭 + 卡片自身 mouseenter 取消关闭"来避免闪烁。 */
+.gm-card-panel { position: fixed; z-index: 70; box-sizing: border-box; width: min(340px, calc(100vw - 16px)); max-height: min(82vh, calc(100vh - 16px)); overflow: auto; overscroll-behavior: contain; background: #101821; border: 1px solid #35455a; border-radius: 10px; box-shadow: 0 16px 40px rgba(0, 0, 0, .6); font-size: 12.5px; }
+.gm-card-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #16212d; border-bottom: 1px solid #263341; border-radius: 10px 10px 0 0; }
+.gm-card-head img { width: 28px; height: 28px; background: #0d1319; border-radius: 5px; image-rendering: pixelated; }
+.gm-card-name { min-width: 0; overflow-wrap: anywhere; font-weight: 600; font-size: 13.5px; line-height: 1.4; }
+.gm-card-head img { flex-shrink: 0; }
+.gm-card-raw { margin-top: 10px; color: #9caabd; }
+.gm-card-raw summary { cursor: pointer; }
+.gm-card-raw pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; line-height: 1.5; }
+.gm-card-body { padding: 6px 12px 12px; }
+.gm-card-sec { margin: 10px 0 4px; color: #7d8fa3; font-size: 11px; letter-spacing: .04em; }
+.gm-card-row { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; color: #c8d4e4; }
+.gm-card-row span { color: #98a9bc; white-space: nowrap; }
+.gm-card-row b { font-weight: 500; text-align: right; overflow-wrap: anywhere; }
+/* 标签为空的整行：装备效果的词条、说明文本段落 —— 左对齐铺满并保留换行 */
+.gm-card-row-wide b { text-align: left; color: #e8edf4; white-space: pre-wrap; line-height: 1.65; font-weight: 400; }
+/* 装备详情沿用游戏的暗色底、品质色与分段层级，模板不伪装成实装属性。 */
+.gm-card-equipment { width: min(340px, calc(100vw - 16px)); max-height: calc(100vh - 24px); border-color: #76684c; border-radius: 3px; background: #141411; color: #d8c68d; font-size: 13px; line-height: 1.6; user-select: text; }
+.gm-card-equipment .gm-card-head { background: #1b1b16; border-color: #62583e; border-radius: 2px 2px 0 0; padding: 12px; gap: 12px; }
+.gm-card-equipment .gm-card-head img { width: 40px; height: 40px; border: 1px solid #786b44; border-radius: 1px; }
+.gm-card-equipment .gm-card-name { font-size: 15px; line-height: 1.6; font-weight: 500; }
+.gm-card-equipment .gm-card-body { padding: 0 12px 12px; }
+.gm-card-equipment .gm-card-group { padding: 8px 0; }
+.gm-card-equipment .gm-card-group + .gm-card-group { border-top: 1px solid #494330; }
+.gm-card-equipment .gm-card-sec { margin: 0 0 4px; color: #c5ab5a; font-size: 12px; letter-spacing: 0; }
+.gm-card-equipment .gm-card-row { padding: 1px 0; gap: 16px; color: #e0cb8b; }
+.gm-card-equipment .gm-card-row span { color: inherit; white-space: normal; }
+.gm-card-equipment .gm-card-row b { font-weight: 400; font-variant-numeric: tabular-nums; }
+.gm-card-equipment [data-section="穿戴信息"] { color: #a9cd9a; }
+.gm-card-equipment [data-section="穿戴信息"] .gm-card-row { color: inherit; }
+.gm-card-equipment [data-section="名望"] .gm-card-row { color: #efd271; font-weight: 600; }
+.gm-card-equipment [data-section="基础属性"] .gm-card-row { color: #a5dfe7; }
+.gm-card-equipment [data-section="物品背景"] .gm-card-row b { color: #b4ac96; }
+.gm-card-equipment .gm-card-row-wide b { color: inherit; line-height: 1.7; }
+.gm-card-template-note { margin: 8px 0; padding-top: 8px; border-top: 1px solid #494330; font-size: 11px; line-height: 1.7; color: #b0aa99; }
+.gm-card-template-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #b0aa99; font-size: 11px; }
+.gm-card-copy-id { padding: 2px 6px; border: 1px solid #62583e; border-radius: 3px; color: #d8c68d; background: #25231a; cursor: pointer; font: inherit; }
+.gm-card-copy-id:focus-visible, .gm-card-equipment summary:focus-visible { outline: 2px solid #e4c776; outline-offset: 2px; }
+.gm-card-equipment .gm-card-raw { color: #b0aa99; font-size: 11px; }
+.gm-card-equipment .gm-card-raw .gm-card-row { color: #b0aa99; font-size: 11px; }
+.gm-card-row-wide > b { min-width: 0; flex: 1; }
+.gm-card-row b .gm-description-run { white-space: pre-wrap; overflow-wrap: anywhere; color: inherit; }
+.gm-card-row b .gm-description-accent { color: #efd271; font-weight: 600; }
+.gm-card-row b .gm-description-warning { color: #f2a099; }
+.gm-card-equipment [data-section="装备说明"] .gm-card-row,
+.gm-card-equipment [data-section="详细说明"] .gm-card-row { color: #e6ddc5; line-height: 1.8; }
+.gm-card-script { padding: 10px 0; border-top: 1px solid #494330; }
+.gm-card-modes { display: flex; gap: 4px; padding: 8px 0; border-bottom: 1px solid #494330; }
+.gm-card-modes button { flex: 1; border: 1px solid transparent; border-radius: 3px; padding: 4px 8px; background: transparent; color: #b0aa99; font: inherit; cursor: pointer; }
+.gm-card-modes button[aria-pressed="true"] { border-color: #786b44; background: #25231a; color: #efd271; }
+.gm-card-modes button:focus-visible { outline: 2px solid #e4c776; outline-offset: 2px; }
+.gm-col-icon { width: 40px; }
+.gm-col-fame { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.gm-row-icon { display: block; width: 30px; height: 30px; border-radius: 4px; background: #0d1319; image-rendering: pixelated; }
+@media (max-width: 900px) { .gm-cat-body { grid-template-columns: minmax(0, 1fr); } .gm-cat-tree { border-right: 0; border-bottom: 1px solid #2b3643; padding: 0 0 10px; max-height: 220px; } }
+
+@media (max-width: 980px) {
+  .gm-layout { grid-template-columns: minmax(0, 1fr); overflow: auto; }
+  .gm-inspector { grid-column: 1; border: 0; padding: 16px 0 0; border-top: 1px solid #2b3643; overflow: visible; }
+  .gm-workspace { min-height: 460px; }
+  .gm-layout .gm-form { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { .gm-pane { animation: none; } .gm-role, .gm-advance-btn { transition: none; } }

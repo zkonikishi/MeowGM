@@ -1,0 +1,54 @@
+{
+  "status": "implemented-GM-wire-boundary-only",
+  "native_ids": {
+    "storage": "existing signed SQLite int64 integers; no renumbering or migration",
+    "browser_api": "canonical positive decimal strings, 1..9223372036854775807; no leading zero, sign, whitespace, exponent, decimal point or non-ASCII digit",
+    "requests": "strings are validated and converted to Python integers before the existing Go stdio int64 codec",
+    "legacy_numbers": "only exact JSON integers 1..9007199254740991 accepted; unsafe integers, all floats and booleans rejected before native access",
+    "responses": "Read115 and known native character/account/history ID fields converted to strings before browser JSON",
+    "pending": "new durable requests store string IDs; old pending integer IDs exposed as strings without rewriting the original file; exact native replay preserved",
+    "ui": "account/role selects and ownership comparison keep strings; no Number/parseInt coercion for native IDs"
+  },
+  "uid_separation": {
+    "platform_uid8": "separate existing format validator: exactly eight ASCII digits as a string, preserve leading zero; format is not authentication or allocation permission",
+    "universal_local_uid": "format/namespace governed by DB+host candidate contract; never infer from native ID or username, never apply platform UID8 format implicitly"
+  },
+  "account_storage_requirement": {
+    "source": "2026-10-16 user: explicit optional external account/UID storage, otherwise native SQLite",
+    "owner_contract": "C:/workspace/_src/PlatformDatabase/account-storage-adapter.contract.json",
+    "owner_contract_status": "configuration validator tested; real external adapter not implemented",
+    "configuration": "server-only explicit sqlite or external; sqlite default only without external fields; external credentials protected on server with TLS verification; failures fail closed",
+    "gm": "consume future authenticated management status/mapping DTO, no direct SQL credentials, no invented ready state or UID mapping",
+    "identity_states": [
+      "ready",
+      "invalid_configuration",
+      "unavailable",
+      "migration_hold",
+      "mapping_pending",
+      "mapping_conflict"
+    ],
+    "transactions": "external canonical account+UID and native SQLite are separate resources; durable pending operation, host idempotent receipt and exact verified mapping before activation; no name adoption or destructive compensation",
+    "policy_override_scope": "user authorization covers optional account/UID adapter only; no character/inventory migration, no Postgres revival or broader SQLite-only policy bypass",
+    "latest_identity_schema_note": "DB r1 predates newest login_id/nickname semantics; owner revision is required before treating it as frozen identity schema. GM native-key boundary only."
+  },
+  "production_verified": false,
+  "latest_user_identity_definition": {
+    "login_id": "user-facing id, ASCII letters/digits, required at registration; central proposed length4..32 pending shared schema",
+    "uid": "independently allocated, not native key or nickname",
+    "username": "display nickname only, default login_id snapshot if omitted; nickname change does not alter identity/bindings",
+    "native_accounts_id": "existing integer relation key retained; GM calls it internal account key, never rewrites it as a string column",
+    "authentication": "GM implements no game account login/registration; future auth permits explicit login_id/UID/verified email/phone/bound provider subject only, numeric login_id-vs-UID must be explicit or reject",
+    "compatibility": "native username label is not used by GM as authentication, UID mapping, or name-based adoption; public nickname/login-ID privacy remains owner schema/API work",
+    "immutability": {
+      "player": "login_id/UID immutable after registration; registration notice and player API allowlists owned by website/host",
+      "nickname": "username display nickname may change without changing identity or mapping",
+      "admin": "not enabled; require independent administrative identity, revision/idempotency, uniqueness/reservation checks, audit, epoch/session/assertion/cache revocation",
+      "receipts": "008 provisioning and009 issue/consume receipts are immutable; no UPDATE of old receipt to match a new UID; reviewed superseding receipt/identity revision is required",
+      "gm_current": "no identity editor or fake-success endpoint; RPC identity methods and extra ID/UID/nickname fields in SP/TP rejected",
+      "policy_contract": "C:/workspace/_src/PlatformDatabase/identity-mutation-policy.contract.json",
+      "native_keys": "remain integer relation keys; no renumbering, sequence reset or player data mutation"
+    },
+    "player_ui": "Actual login_id/UID fields are gray readonly and remain legible/copyable; only nickname editable, one clear registration notice. Do not show protection/rejection jargon in normal player flows; no admin edit button in player account center.",
+    "gm_ui": "GM target selectors are internal native relation keys, not player login_id/UID fields; no canonical identity values are invented from native key/name. No player account center or privileged identity editor implemented here."
+  }
+}
