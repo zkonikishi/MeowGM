@@ -1,7 +1,12 @@
 param([string]$Source='')
 $ErrorActionPreference='Stop'
 if(-not $Source){$Source=if($env:MEOW_UPSTREAM_DIR){$env:MEOW_UPSTREAM_DIR}else{Join-Path $PSScriptRoot '..\upstream\115us-dfolauncher'}}
-$revision=(& git -C $Source rev-parse HEAD).Trim()
+foreach($required in @('gm/go.mod','gm/cmd/gmtool')){
+ if(!(Test-Path -LiteralPath (Join-Path $Source $required))){throw "GM upstream dependency missing: $required. Specify -Source with the reviewed checkout."}
+}
+$revision=& git -C $Source rev-parse HEAD
+if($LASTEXITCODE -ne 0){throw 'Cannot read upstream GM revision'}
+$revision=($revision -join '').Trim()
 if($revision -ne '2e80468daec25820beaf3d6eceea79a40c6dda31'){throw 'Upstream GM revision differs from reviewed baseline'}
 $workspace=Join-Path $env:TEMP ('meowgm-native-fixture-'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $workspace | Out-Null

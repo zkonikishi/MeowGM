@@ -1,21 +1,38 @@
 param(
     [string]$Python='C:/rust-toolchain/meowgm-build/Scripts/python.exe',
     [string]$ReleaseName='',
+    [string]$Upstream='',
     [string]$OutputRoot='C:/dev-toolchain/releases/MeowGM',
     [switch]$SkipHostBuild,
     [switch]$IncludeSimulationTools
 )
 $ErrorActionPreference='Stop'
 $suiteRoot=Split-Path -Parent $PSScriptRoot
+if(!$Upstream){$Upstream=if($env:MEOW_UPSTREAM_DIR){$env:MEOW_UPSTREAM_DIR}else{Join-Path $suiteRoot 'upstream/115us-dfolauncher'}}
+if(!$SkipHostBuild){
+    foreach($required in @('go.mod','cmd/modkit','gm/go.mod','gm/cmd/gmtool','gm/configs')){
+        if(!(Test-Path -LiteralPath (Join-Path $Upstream $required))){throw "GM upstream dependency missing: $required. Specify -Upstream with the reviewed 115us-dfolauncher checkout."}
+    }
+    $revision=& git -C $Upstream rev-parse HEAD
+    if($LASTEXITCODE -ne 0 -or ($revision -join '').Trim() -ne '2e80468daec25820beaf3d6eceea79a40c6dda31'){throw 'Upstream GM revision differs from reviewed baseline'}
+}
+
 # MeowGM has its own version source, independent from the launcher.
 $managerManifest=Get-Content (Join-Path $suiteRoot 'apps/manager/src-tauri/Cargo.toml') -Raw
 if($managerManifest -notmatch '(?m)^version\s*=\s*"([^"]+)"'){throw 'Manager package version missing'}
-$managerVersion=$matches[1]
+$managerSemver=$matches[1]
+$versionMetadata=Get-Content (Join-Path $suiteRoot 'apps/manager/version.json') -Raw | ConvertFrom-Json
+$managerVersion=$versionMetadata.version
+if($managerVersion -notmatch '^([0-9]{2})\.([1-9][0-9]*)(?:-(snapshot|pre|rc)-([1-9][0-9]*)|\.([1-9][0-9]*))?$'){throw 'Invalid GM public version'}
+$expectedSemver="$($matches[1]).$($matches[2]).0"
+if($matches[3]){$expectedSemver+="-$($matches[3])-$($matches[4])"}
+elseif($matches[5]){$expectedSemver="$($matches[1]).$($matches[2]).$($matches[5])"}
+if($managerSemver -ne $expectedSemver -or $versionMetadata.semver -ne $expectedSemver){throw 'GM internal SemVer mapping differs'}
 if(!$ReleaseName){$ReleaseName=$managerVersion}
 $configPath=Join-Path $suiteRoot 'apps/manager/src-tauri/tauri.conf.json'
 $config=Get-Content $configPath -Raw | ConvertFrom-Json
-if($config.version -ne $managerVersion){$config.version=$managerVersion;$config | ConvertTo-Json -Depth 20 | Set-Content $configPath -Encoding utf8}
-if($ReleaseName -notmatch '^[A-Za-z0-9._-]+$'){throw 'Invalid release directory name'}
+if($config.version -ne $managerSemver){throw 'GM Tauri version differs from internal SemVer'}
+if($ReleaseName -ne $managerVersion){throw 'Release directory must match GM public version'}
 $env:CARGO_HOME='C:/rust-toolchain/cargo'
 $env:RUSTUP_HOME='C:/rust-toolchain/rustup'
 $env:PATH="$env:CARGO_HOME/bin;$env:PATH"
@@ -45,7 +62,6 @@ try {
         $env:GOMODCACHE=Join-Path $env:TEMP 'go-mod-cache'
         $env:GOTMPDIR=$env:TEMP
         $modkit=Join-Path $env:TEMP 'meowgm-modkit.exe'
-        $upstream=if($env:MEOW_UPSTREAM_DIR){$env:MEOW_UPSTREAM_DIR}else{Join-Path $PSScriptRoot '..\upstream\115us-dfolauncher'}
         $go=if($env:MEOW_GO){$env:MEOW_GO}else{'go'}
         Push-Location -LiteralPath $upstream
         try { & $go build -mod=readonly -o $modkit ./cmd/modkit; if($LASTEXITCODE -ne 0){throw 'Upstream modkit build failed'} } finally {Pop-Location}
@@ -71,10 +87,11 @@ try {
     $release=Join-Path $OutputRoot $ReleaseName
     New-Item -ItemType Directory -Path $release -Force | Out-Null
     Copy-Item -LiteralPath "$env:CARGO_TARGET_DIR/release/meow-manager.exe" -Destination "$release/MeowGM.exe"
+    Copy-Item -LiteralPath 'apps/manager/version.json' -Destination "$release/version.json"
     Copy-Item -LiteralPath 'apps/manager/README.txt' -Destination "$release/管理器使用说明.txt"
     Copy-Item -LiteralPath 'apps/admin/UPSTREAM-UI.txt' -Destination "$release/上游界面来源.txt"
     $artifact=Get-Item -LiteralPath "$release/MeowGM.exe"
-    $record=[ordered]@{product='MeowGM';version=$managerVersion;edition='unified';fileName='MeowGM.exe';size=$artifact.Length;sha256=(Get-FileHash -LiteralPath $artifact.FullName).Hash.ToLower();builtAt=(Get-Date).ToUniversalTime().ToString('o');productionVerified=$false}
+    $record=[ordered]@{product='MeowGM';version=$managerVersion;internalSemver=$managerSemver;edition='unified';fileName='MeowGM.exe';size=$artifact.Length;sha256=(Get-FileHash -LiteralPath $artifact.FullName).Hash.ToLower();builtAt=(Get-Date).ToUniversalTime().ToString('o');productionVerified=$false}
     $record | ConvertTo-Json | Set-Content -LiteralPath "$release/artifact.json" -Encoding utf8
     Write-Output "Built: $($artifact.FullName)"
 } finally {Pop-Location}

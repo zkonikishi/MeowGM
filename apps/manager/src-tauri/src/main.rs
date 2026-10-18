@@ -12,7 +12,7 @@ fn manager_update_base()->String {
         .filter(|s|meow_launcher_core::update::validate_base(s).is_ok()).unwrap_or_default()
 }
 #[tauri::command]
-fn manager_about()->serde_json::Value {serde_json::json!({"product":"MeowGM","version":env!("CARGO_PKG_VERSION"),"edition":"unified","notes":"统一版本 · 手动配置服务器，本机保存连接信息","productMarker":meow_launcher_core::update::Program::Manager.marker()})}
+fn manager_about()->serde_json::Value {serde_json::json!({"product":"MeowGM","version":env!("MEOW_MANAGER_DISPLAY_VERSION"),"edition":"unified","notes":"统一版本 · 手动配置服务器，本机保存连接信息","productMarker":meow_launcher_core::update::Program::Manager.marker()})}
 #[tauri::command]
 async fn manager_check_update()->meow_launcher_core::Result<meow_launcher_core::update::UpdateStatus> {meow_launcher_core::update::check(&manager_update_base(),env!("CARGO_PKG_VERSION"),"manager-v1",meow_launcher_core::update::Program::Manager).await}
 #[tauri::command]
@@ -81,7 +81,7 @@ fn main(){
             if !executable.exists() || Sha256::digest(std::fs::read(&executable)?).as_slice()!=Sha256::digest(payload).as_slice(){std::fs::write(&executable,payload)?;}
             let diagnostics=data.join("logs");std::fs::create_dir_all(&diagnostics)?;
             let errors=std::fs::OpenOptions::new().create(true).append(true).open(diagnostics.join("backend-startup.log"))?;
-            let mut child=Command::new(executable).env("OO_MANAGER_DATA",data.join("data")).env("OO_MANAGER_PARENT",std::process::id().to_string()).env("MEOW_MANAGER_VERSION",env!("CARGO_PKG_VERSION")).creation_flags(0x08000000).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::from(errors)).spawn()?;
+            let mut child=Command::new(executable).env("OO_MANAGER_DATA",data.join("data")).env("OO_MANAGER_PARENT",std::process::id().to_string()).env("MEOW_MANAGER_VERSION",env!("MEOW_MANAGER_DISPLAY_VERSION")).creation_flags(0x08000000).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::from(errors)).spawn()?;
             let stdout=child.stdout.take().ok_or("管理服务启动失败")?;
             app.manage(Backend(Mutex::new(Some(child))));
             let (sender,receiver)=std::sync::mpsc::channel();

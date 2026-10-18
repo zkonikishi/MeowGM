@@ -1,0 +1,7 @@
+{
+  "product": "MeowGM",
+  "version": "26.1-snapshot-1",
+  "semver": "26.1.0-snapshot-1",
+  "status": "development",
+  "mapping": "Public YY.release-stage-N maps internally to YY.release.0-stage-N; internal SemVer is not the display version."
+}

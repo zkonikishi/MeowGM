@@ -2206,7 +2206,7 @@ dependencies = [
 
 [[package]]
 name = "meow-manager"
-version = "0.7.4"
+version = "26.1.0-snapshot-1"
 dependencies = [
  "meow-launcher-core",
  "open",
