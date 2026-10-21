@@ -10,6 +10,9 @@ from gm_bridge import GMBridge
 from fixture_control import FixtureControl
 from native_ids import native_id_from_request
 from mod_manager import ModManager
+from client_mods import ClientMods
+from deployment_wizard import DeploymentWizard
+from developer_control import DeveloperControl
 from manager_ssh import ManagerSSH
 from environment import Environment
 from read115 import Read115, Read115Error
@@ -123,6 +126,8 @@ class Gateway(ThreadingHTTPServer):
         self.fixture_control=FixtureControl(Path(store.path).parent,enabled=os.environ.get('MEOW_GM_SYNTHETIC_CONTROL')=='1')
         self.read115=Read115(self.environment)
         self.mod_manager=ModManager(self.environment)
+        self.client_mods=ClientMods(self.environment,self.gm_bridge)
+        self.deployment_wizard=DeploymentWizard(trust_store=Path(store.path).parent/'gm-deployment-trust.json')
         self.connections=Connections(Path(store.path).parent/'connections.json')
         self.tunnel=Tunnel(Path(store.path).parent/'tunnel.json')
         self.deployment=Deployment(Path(store.path).parent/'deployment-jobs')
@@ -188,6 +193,15 @@ class Handler(BaseHTTPRequestHandler):
                 try:return self.reply(200,self.server.fixture_control.logs(int(parse_qs(urlsplit(self.path).query).get('after',['0'])[0])))
                 except ValueError:return self.reply(400,{'error':'日志游标无效'})
             return self.reply(404,{'error':'合成演练接口不存在'})
+        if path=='/api/admin/developer-control/capabilities':
+            if self.server.profile!='115us':return self.reply(409,{'error':'开发者控制仅适用于 115US'})
+            if not self.session():return self.reply(401,{'error':'请先打开本机管理窗口'})
+            return self.reply(200,DeveloperControl.capabilities())
+        if path=='/api/admin/client-mods':
+            if self.server.profile!='115us':return self.reply(409,{'error':'客户端 MOD 管理仅适用于 115US'})
+            if not self.session():return self.reply(401,{'error':'请先打开本机管理窗口'})
+            try:return self.reply(200,self.server.client_mods.list())
+            except (ValueError,OSError) as e:return self.reply(400,{'error':str(e)})
         if path=='/api/admin/mod-manager':
             if self.server.profile!='115us':return self.reply(409,{'error':'MOD 管理仅适用于 115US'})
             if not self.session():return self.reply(401,{'error':'请先打开本机管理窗口'})
@@ -291,6 +305,17 @@ class Handler(BaseHTTPRequestHandler):
                 if path=='/api/admin/gm/call':return self.reply(200,bridge.call(body))
                 if path=='/api/admin/gm/preview':return self.reply(200,bridge.preview(body))
                 raise ValueError('GM 请求路径无效')
+            if path=='/api/admin/developer-control/request':
+                if self.server.profile!='115us':return self.reply(409,{'error':'开发者控制仅适用于 115US'})
+                try:result=DeveloperControl.request(body)
+                except ValueError:return self.reply(400,{'ok':False,'code':'invalid_request','enabled':False})
+                return self.reply(503,result)
+            if path=='/api/admin/deployment-wizard/inspect':
+                if self.server.profile!='115us':return self.reply(409,{'error':'部署预检仅适用于 115US'})
+                return self.reply(200,self.server.deployment_wizard.inspect(body))
+            if path=='/api/admin/client-mods/set':
+                if self.server.profile!='115us':return self.reply(409,{'error':'客户端 MOD 管理仅适用于 115US'})
+                return self.reply(200,self.server.client_mods.set_enabled(body))
             if path=='/api/admin/mod-manager/set':
                 if self.server.profile!='115us':return self.reply(409,{'error':'MOD 管理仅适用于 115US'})
                 return self.reply(200,self.server.mod_manager.set_enabled(body))

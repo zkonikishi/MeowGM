@@ -1,5 +1,6 @@
 [package]
 name = "meow-manager"
+authors = ["zkonikishi"]
 version = "26.1.0-snapshot-1"
 edition = "2021"
 

@@ -67,6 +67,70 @@ class Manager070Tests(unittest.TestCase):
         self.server.profile='115us'
         self.assertEqual(self.request('/api/admin/gm/status')[0],200)
         self.assertEqual(self.request('/api/admin/gm/call',{'method':'patch.liveStart'})[0],400)
+    def test_developer_control_requires_local_session_but_never_promotes_it_to_host(self):
+        self.server.profile='115us'
+        self.assertEqual(self.request('/api/admin/developer-control/capabilities',authenticated=False)[0],401)
+        self.assertEqual(self.request('/api/admin/developer-control/request',{'op':'list'},authenticated=False)[0],401)
+        self.initialize()
+        code,cap=self.request('/api/admin/developer-control/capabilities');self.assertEqual(code,200);self.assertFalse(cap['executionEnabled']);self.assertFalse(cap['remoteProbed'])
+        code,result=self.request('/api/admin/developer-control/request',{'op':'list'})
+        self.assertEqual(code,503);self.assertEqual(result,{'ok':False,'code':'management_session_unavailable','enabled':False})
+        self.assertEqual(self.request('/api/admin/developer-control/request',{'op':'list','token':'fixture'})[0],400)
+
+    def test_deployment_wizard_reloads_private_public_key_store(self):
+        import base64
+        import time
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        from cryptography.hazmat.primitives.serialization import Encoding,PublicFormat
+        self.server.profile='115us';self.initialize()
+        components={}
+        for role in ['server','gateway','adapter']:
+            raw=('synthetic '+role).encode();(self.root/(role+'.bin')).write_bytes(raw)
+            components[role]={'path':role+'.bin','version':'fixture-1','protocol':'unapproved-fixture','sha256':hashlib.sha256(raw).hexdigest()}
+        connection={'schema':'meow-player-connection-draft-v1','realm':'fixture','host':'game.invalid','port':27001,'admissionOrigin':'https://account.invalid','adapterVersion':'fixture-1'}
+        (self.root/'gm-deployment.evidence.json').write_text(json.dumps({'schema':'meow-gm-preflight-v1','components':components,'connection':connection}))
+        key=Ed25519PrivateKey.generate();now=int(time.time())
+        row={'keyId':'fixture-key','publicKey':base64.b64encode(key.public_key().public_bytes(Encoding.Raw,PublicFormat.Raw)).decode(),'realms':['fixture'],'notBefore':now-10,'notAfter':now+300,'revoked':False}
+        trust=self.root/'gm-deployment-trust.json';trust.write_text(json.dumps({'schema':'meow-gm-deployment-trust-v1','keys':[row]}))
+        raw=json.dumps(connection,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
+        envelope={'keyId':'fixture-key','algorithm':'Ed25519','descriptor':connection,'signature':base64.b64encode(key.sign(raw)).decode()}
+        (self.root/'player-connection.signed.json').write_text(json.dumps(envelope))
+        endpoint='/api/admin/deployment-wizard/inspect';body={'directory':str(self.root)}
+        code,result=self.request(endpoint,body);self.assertEqual(code,200);self.assertEqual(result['signatureStatus'],'verified');self.assertFalse(result['supported'])
+        row['revoked']=True;trust.write_text(json.dumps({'schema':'meow-gm-deployment-trust-v1','keys':[row]}))
+        self.assertEqual(self.request(endpoint,body)[0],400)
+
+    def test_deployment_wizard_is_private_and_dry_run(self):
+        self.server.profile='115us'
+        endpoint='/api/admin/deployment-wizard/inspect'
+        self.assertEqual(self.request(endpoint,{'directory':str(self.root)},authenticated=False)[0],401)
+        self.initialize()
+        components={}
+        for role in ['server','gateway','adapter']:
+            raw=('synthetic '+role).encode();(self.root/(role+'.bin')).write_bytes(raw)
+            components[role]={'path':role+'.bin','version':'fixture-1','protocol':'unapproved-fixture','sha256':hashlib.sha256(raw).hexdigest()}
+        connection={'schema':'meow-player-connection-draft-v1','realm':'fixture','host':'game.invalid','port':27001,'admissionOrigin':'https://account.invalid','adapterVersion':'fixture-1'}
+        (self.root/'gm-deployment.evidence.json').write_text(json.dumps({'schema':'meow-gm-preflight-v1','components':components,'connection':connection}))
+        code,result=self.request(endpoint,{'directory':str(self.root)})
+        self.assertEqual(code,200);self.assertTrue(result['dryRun']);self.assertFalse(result['executed']);self.assertFalse(result['supported'])
+        self.assertEqual(self.request(endpoint,{'directory':str(self.root),'sshPassword':'fixture'})[0],400)
+
+    def test_client_mod_routes_are_private_and_write_only_selected_manifest(self):
+        self.server.profile='115us'
+        self.assertEqual(self.request('/api/admin/client-mods',authenticated=False)[0],401)
+        self.assertEqual(self.request('/api/admin/client-mods/set',{},authenticated=False)[0],401)
+        self.initialize()
+        client=self.root/'client';(client/'mods').mkdir(parents=True)
+        manifest=client/'mods/mods.json'
+        manifest.write_text(json.dumps({'plugins':[{'name':'fixture','path':'mods/fixture.dll','enabled':True}]}))
+        self.server.environment.save({'profile':'115us','mode':'local','root':str(self.root),'version':''})
+        self.server.gm_bridge.save({'clientDirectory':str(client)})
+        code,data=self.request('/api/admin/client-mods');self.assertEqual(code,200)
+        body={'id':'fixture','enabled':False,'clientDirectory':data['clientDirectory'],'revision':data['revision']}
+        code,result=self.request('/api/admin/client-mods/set',body)
+        self.assertEqual(code,200);self.assertFalse(result['mods'][0]['enabled'])
+        self.assertEqual(self.request('/api/admin/client-mods/set',body)[0],400)
+
     def test_target_preview_is_private_and_does_not_change_active_environment(self):
         endpoint='/api/admin/environment/target?productMode=custom&mode=cloud'
         self.assertEqual(self.request(endpoint,authenticated=False)[0],401)

@@ -12,7 +12,7 @@ fn manager_update_base()->String {
         .filter(|s|meow_launcher_core::update::validate_base(s).is_ok()).unwrap_or_default()
 }
 #[tauri::command]
-fn manager_about()->serde_json::Value {serde_json::json!({"product":"MeowGM","version":env!("MEOW_MANAGER_DISPLAY_VERSION"),"edition":"unified","notes":"统一版本 · 手动配置服务器，本机保存连接信息","productMarker":meow_launcher_core::update::Program::Manager.marker()})}
+fn manager_about()->serde_json::Value {serde_json::json!({"product":"MeowGM","author":env!("CARGO_PKG_AUTHORS"),"version":env!("MEOW_MANAGER_DISPLAY_VERSION"),"edition":"unified","notes":"统一版本 · 手动配置服务器，本机保存连接信息","productMarker":meow_launcher_core::update::Program::Manager.marker()})}
 #[tauri::command]
 async fn manager_check_update()->meow_launcher_core::Result<meow_launcher_core::update::UpdateStatus> {meow_launcher_core::update::check(&manager_update_base(),env!("CARGO_PKG_VERSION"),"manager-v1",meow_launcher_core::update::Program::Manager).await}
 #[tauri::command]

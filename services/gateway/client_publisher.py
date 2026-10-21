@@ -9,6 +9,8 @@ EXE_SHA='1f8244d3f7309bbe2fde4299e1863a894f6b28d5707bf01732980585b20b00dd'
 ORIGIN='https://launcher.invalid/launcher/client/meowopia-custom/s4a21/releases/'
 PROTECTED={'data','updates','screenshot','screenshots','capture','captures','log','logs','launcher.public.json','meowlauncher.exe','meowmanager.exe','meow-launcher.exe','meow-manager.exe','oolauncher.exe','oomanager.exe','oo launcher.exe','oo manager.exe','oo-launcher.exe','oo-manager.exe'}
 SETTINGS={'.ini','.cfg','.xml','.json'}
+PRIVATE_NAMES={'.ssh','.env','server-settings.json','gm-settings.json','connections.json','manager.public.json','identity.json','storage.json','id_rsa','id_ed25519','id_ecdsa','authorized_keys'}
+PRIVATE_SUFFIXES={'.pem','.key','.pfx','.p12','.sqlite','.sqlite3','.db'}
 class PublicationError(ValueError):
     """A controlled, operator-facing validation message."""
 
@@ -16,6 +18,7 @@ ROOT_SETTINGS={'GameGaurd.ini','GameNative.ini','AutoFire.ini','CombatPower.ini'
 def safe_path(name):
     if not isinstance(name,str) or not name or len(name.encode())>512 or any(c in '\\:*?"<>|' or ord(c)<32 or 127<=ord(c)<=159 for c in name):raise PublicationError('不安全的客户端文件名')
     parts=name.split('/')
+    if any(part.casefold() in PRIVATE_NAMES or part.casefold().startswith('.env.') or Path(part).suffix.casefold() in PRIVATE_SUFFIXES for part in parts):raise PublicationError('客户端清单不能包含管理配置、私钥或数据库')
     if parts[0].lower() in PROTECTED or parts[0].lower().startswith('.oo-'):raise PublicationError('客户端清单包含私人或启动器数据')
     for part in parts:
         stem=part.split('.')[0].upper()

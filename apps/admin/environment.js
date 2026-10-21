@@ -40,3 +40,8 @@ for(const [id,action] of [['connect','connect'],['disconnect','disconnect'],['ch
 for(const id of ['saved-server-host','saved-server-port'])$(id).addEventListener('input',()=>{$('saved-server-fingerprint').value='';});
 
 async function loadManualServer(){showSavedServer(await api('/api/admin/server-settings'));const r=await api('/api/admin/server-ssh/status',{});$('saved-server-status').textContent=r.message;}
+
+const deploymentWizard=document.createElement('section');
+deploymentWizard.innerHTML='<h2>115US 部署预检</h2><p>读取预检包内 gm-deployment.evidence.json，核对 server / gateway / adapter 文件指纹与声明。仅输出 dry-run 及分离配置草稿，不连接服务器或执行安装。</p><label>预检包目录<input id="gm-preflight-directory" autocomplete="off"></label><button id="gm-preflight-run">只读检查并生成计划</button><p id="gm-preflight-status" role="status">尚未检查</p><pre id="gm-preflight-result"></pre>';
+pages.get('connections').append(deploymentWizard);
+$('gm-preflight-run').onclick=()=>run(async()=>{const result=await api('/api/admin/deployment-wizard/inspect',{directory:$('gm-preflight-directory').value.trim()});$('gm-preflight-status').textContent='未执行部署 · '+result.blockers.join('；');$('gm-preflight-result').textContent=JSON.stringify(result,null,2);});

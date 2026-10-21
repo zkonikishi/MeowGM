@@ -49,7 +49,7 @@ if(window.__TAURI__?.core){
   finally{updating=false;$('manager-update-check').disabled=false;$('manager-update-download').disabled=false;}
  };
  $('manager-update-open').onclick=()=>nativeInvoke('manager_open_update').catch(e=>{$('manager-update-status').textContent=e?.message||'文件夹无法打开';});
- nativeInvoke('manager_about').then(info=>{$('manager-about').textContent=`${info.product} ${info.version}`;$('manager-edition').textContent=info.notes;}).catch(()=>{$('manager-about').textContent='版本读取失败';});
+ nativeInvoke('manager_about').then(info=>{$('manager-about').textContent=`${info.product} ${info.version}`;$('manager-edition').textContent=info.notes+(info.author?' · 项目维护/改动作者：'+info.author:'');}).catch(()=>{$('manager-about').textContent='版本读取失败';});
  updateCheck();
 }
 

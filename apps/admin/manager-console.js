@@ -7,3 +7,9 @@
  $('fixture-refresh').onclick=()=>run(async()=>{render(await api('/api/admin/fixture-control/status'));await logs();});
  for(const action of ['start','stop'])$('fixture-'+action).onclick=()=>run(async()=>{render(await api('/api/admin/fixture-control/'+action,{}));await logs();});
 })();
+
+(()=>{
+ const panel=document.createElement('section');panel.innerHTML='<h2>MeowScope 开发者控制</h2><p>宿主可信管理会话、撤销和 RBAC 尚未接通。本机窗口登录及 SSH 连接不会授予远端管理权限。</p><button id="developer-capabilities">检查本地接口能力</button><button disabled>启用</button><button disabled>启动</button><button disabled>取消</button><p id="developer-control-status" role="status">未连接真实宿主；执行已禁用。</p>';
+ pages.get('deploy').append(panel);
+ $('developer-capabilities').onclick=()=>run(async()=>{const result=await api('/api/admin/developer-control/capabilities');$('developer-control-status').textContent=result.protocol+' · '+result.capabilityReason+' · 仅本地合同信息，未探测远端';});
+})();

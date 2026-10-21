@@ -31,6 +31,8 @@
   },
   "bundle": {
     "active": false,
-    "icon": []
+    "icon": [],
+    "publisher": "zkonikishi",
+    "copyright": "Project maintenance and changes: zkonikishi. Upstream copyrights retained."
   }
 }

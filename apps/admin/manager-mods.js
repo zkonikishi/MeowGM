@@ -19,3 +19,21 @@ $('managed-mods-refresh').onclick=()=>run(async()=>{showManagedMods(await api('/
 const activityPage=document.createElement('div');activityPage.dataset.managerPage='activities';activityPage.hidden=true;pages.set('activities',activityPage);$('workspace').append(activityPage);
 const activityPanel=document.createElement('section');activityPanel.innerHTML='<h2>游戏活动</h2><p>节日、副本、掉落活动需要对应的 115US 服务端控制接口。当前上游 GM 未提供统一开启命令，尚不能从此处开启活动。</p><div class="activity-grid"></div><small>签到相关内容来自所选客户端 PVF，运行日期另由服务端日历处理；读取 PVF 不等于开启活动。不会用本地草稿冒充已生效。</small>';activityPage.append(activityPanel);
 for(const name of ['节日活动','副本活动','掉落活动']){const row=document.createElement('article');row.className='managed-mod-row';const title=document.createElement('h3');title.textContent=name;const text=document.createElement('p');text.textContent='开启状态未知 · 服务端开关尚未接通';const button=document.createElement('button');button.textContent='开启接口待接入';button.disabled=true;row.append(title,text,button);activityPanel.querySelector('.activity-grid').append(row);}
+
+const clientModsPanel=document.createElement('section');
+clientModsPanel.innerHTML='<h2>客户端 MOD</h2><p>使用 GM 设置中保存的客户端目录。清单配置与实际加载分开显示；保存后下次启动生效。</p><button id="client-mods-refresh">刷新客户端 MOD</button><p id="client-mods-status" role="status">尚未读取</p><div id="client-mods-list"></div>';
+managedModsPage.append(clientModsPanel);
+function showClientMods(data){
+ $('client-mods-status').textContent=data.message;
+ $('client-mods-list').replaceChildren();
+ for(const mod of data.mods){
+  const row=document.createElement('article');row.className='managed-mod-row';
+  const title=document.createElement('h3');title.textContent=mod.id;
+  const text=document.createElement('p');text.textContent=mod.path+' · 配置：'+(mod.enabled?'启用':'停用')+' · 文件：'+(mod.filePresent?'存在':'缺失')+' · 实际加载：未知'+(mod.bypassPossible?' · 宿主可能绕过此开关':'');
+  const button=document.createElement('button');button.textContent=mod.enabled?'停用':'启用';button.disabled=!mod.canToggle;
+  button.onclick=()=>run(async()=>{button.disabled=true;try{showClientMods(await api('/api/admin/client-mods/set',{id:mod.id,enabled:!mod.enabled,clientDirectory:data.clientDirectory,revision:data.revision}));}finally{button.disabled=!mod.canToggle;}});
+  row.append(title,text,button);$('client-mods-list').append(row);
+ }
+ if(!data.mods.length)$('client-mods-list').textContent='未发现客户端 MOD 清单项。';
+}
+$('client-mods-refresh').onclick=()=>run(async()=>showClientMods(await api('/api/admin/client-mods')));

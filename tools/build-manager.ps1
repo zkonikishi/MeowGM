@@ -91,7 +91,7 @@ try {
     Copy-Item -LiteralPath 'apps/manager/README.txt' -Destination "$release/管理器使用说明.txt"
     Copy-Item -LiteralPath 'apps/admin/UPSTREAM-UI.txt' -Destination "$release/上游界面来源.txt"
     $artifact=Get-Item -LiteralPath "$release/MeowGM.exe"
-    $record=[ordered]@{product='MeowGM';version=$managerVersion;internalSemver=$managerSemver;edition='unified';fileName='MeowGM.exe';size=$artifact.Length;sha256=(Get-FileHash -LiteralPath $artifact.FullName).Hash.ToLower();builtAt=(Get-Date).ToUniversalTime().ToString('o');productionVerified=$false}
+    $record=[ordered]@{product='MeowGM';author=$versionMetadata.author;version=$managerVersion;internalSemver=$managerSemver;edition='unified';fileName='MeowGM.exe';size=$artifact.Length;sha256=(Get-FileHash -LiteralPath $artifact.FullName).Hash.ToLower();builtAt=(Get-Date).ToUniversalTime().ToString('o');productionVerified=$false}
     $record | ConvertTo-Json | Set-Content -LiteralPath "$release/artifact.json" -Encoding utf8
     Write-Output "Built: $($artifact.FullName)"
 } finally {Pop-Location}

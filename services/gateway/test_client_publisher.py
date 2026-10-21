@@ -29,6 +29,10 @@ class PublisherTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'版本'):build({'directory':str(self.root),'version':'1.0.0'},self.base/'output')
         for path in ['../outside','a\\b','data/account.json','ScreenShots/private.png','OOManager.exe','CON.txt','name:stream']:
             with self.assertRaises(ValueError,msg=path):safe_path(path)
+    def test_management_secrets_rejected_even_inside_resource_folders(self):
+        for name in ['ImagePacks2/server-settings.json','SoundPacks/identity.json','ImagePacks2/.ssh/id_ed25519','SoundPacks/private.pem','ImagePacks2/game.sqlite3','SoundPacks/.env.production']:
+            with self.subTest(path=name),self.assertRaises(ValueError):safe_path(name)
+
     def test_output_never_enters_client_or_accepts_unsafe_wrapper(self):
         with self.assertRaisesRegex(ValueError,'客户端内'):build({'directory':str(self.root),'version':'1.0.0','buildArchive':False},self.root/'output',exe_sha=self.exe_sha)
         with self.assertRaises(ValueError):self.run_build(archiveRoot='../bad')

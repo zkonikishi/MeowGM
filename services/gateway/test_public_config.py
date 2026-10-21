@@ -44,6 +44,10 @@ class PublicConfigTests(unittest.TestCase):
         with self.assertRaises(ValueError):install(self.body())
         self.assertFalse((self.root/FILENAME).exists())
 
+    def test_player_config_never_accepts_management_or_runtime_secrets(self):
+        for field in ['ticket','sessionToken','databasePassword','sshPassword','sshPrivateKey','adminToken','signingPrivateKey']:
+            with self.subTest(field=field),self.assertRaises(ValueError):validate({**self.config,field:'synthetic-secret'})
+
     def test_optional_account_links_and_new_sources_are_backward_compatible(self):
         value=dict(self.config);value.pop('registerUrl');value.pop('forgotUrl')
         self.assertEqual(validate(value),value)
