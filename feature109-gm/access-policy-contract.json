@@ -1,0 +1,19 @@
+{
+  "contract": "gm-access-policy-semantics-v1",
+  "status": "candidate_not_runtime_verified",
+  "publicApiEnabled": false,
+  "linearization": "capture_at_admission",
+  "captureCommit": "policy_version_settings_revision_and_run_daily_ignore_with_admit_checkpoint_in_same_transaction",
+  "inFlight": "legally_admitted_run_may_finish_under_captured_policy_after_setting_changes",
+  "deposit": "restore_run_capture_and_compare_actual_persistent_used_then_increment_naturally",
+  "legacyRun": "do_not_backfill_capture_from_current_global_settings",
+  "settingSaveUi": "设置已保存；仅影响后续新捕获操作，不取消已合法入场的在途运行。",
+  "forbiddenUiClaim": "既有运行已撤销",
+  "observationVersion": "canonical_consistent_read_hash_for_display_only_not_business_cas",
+  "backendEvidenceRequired": [
+    "same_transaction_admission_checkpoint",
+    "reopened_run_restores_capture",
+    "setting_change_does_not_reinterpret_in_flight_run",
+    "actual_counter_expected_cas_and_natural_increment"
+  ]
+}

@@ -1,5 +1,5 @@
 // Task navigation only; all management APIs keep their own authorization.
-const managerPages=[['overview','首页'],['deploy','服务器'],['accounts','玩家管理'],['launcher','客户端发布'],['notices','公告与活动'],['mods','MOD 与工具'],['settings','设置']];
+const managerPages=[['overview','首页'],['mrad','Mrad 只读管理'],['deploy','服务器'],['accounts','玩家管理'],['launcher','客户端发布'],['notices','公告与活动'],['mods','MOD 与工具'],['settings','设置']];
 const secondaryGroups={deploy:[['connections','连接服务器'],['deploy','网关组件'],['logs','操作记录']]};
 const pageGroups={connections:'deploy',logs:'deploy'};
 const pages=new Map();let selectedPage='overview';
@@ -14,7 +14,7 @@ for(const [key,text] of Object.entries(help)){const p=document.createElement('p'
 function planned(key,title,text){const details=document.createElement('details');details.className='planned-capabilities';details.innerHTML=`<summary>${title}</summary><p>${text}</p>`;pages.get(key).append(details);}
 planned('accounts','其他玩家管理功能','邮件、物品与点券修改仍在对接，当前没有可用的发放入口。');
 planned('notices','活动与兑换码','活动、奖励与 CDK 共用接口尚未接通。');
-planned('deploy','GM 工具与服务控制台','GM 安装更新、设备绑定以及游戏服启停、实时日志仍在接通。115US 远程控制接口尚未完成。');
+planned('deploy','GM 工具与服务控制台','GM 安装更新、设备绑定以及游戏服启停、实时日志仍在接通。Mrad Max 远程控制接口尚未完成。');
 pages.get('settings').innerHTML='<section><h2>连接与数据</h2><p>连接信息保存在本机，服务器使用自己的 SSH 或管理接口验证权限。</p><button data-open-page="connections">修改服务器连接</button></section><section><h2>AI 辅助</h2><p>AI 连接与日志分析尚未接通。后续会先展示发送内容与配置建议，再由管理员应用。</p></section>';
 const nav=document.querySelector('aside nav');nav.replaceChildren();nav.setAttribute('aria-label','管理任务');
 for(const [key,title] of managerPages){const button=document.createElement('button');button.textContent=title;button.dataset.openPage=key;nav.append(button);}
@@ -53,7 +53,7 @@ if(window.__TAURI__?.core){
  updateCheck();
 }
 
-const modSection=document.createElement('section');modSection.innerHTML='<small>115US · 工具链</small><h2>MOD 管理</h2><p>旧 MeowCore 插件宿主与插件商城已移除。</p><p>115US 使用上游 modkit 与启动器编排。当前尚未完成适配，暂不提供安装、启停或商城入口。</p>';pages.get('mods').append(modSection);
+const modSection=document.createElement('section');modSection.innerHTML='<small>Mrad Max · 工具链</small><h2>MOD 管理</h2><p>旧 MeowCore 插件宿主与插件商城已移除。</p><p>Mrad Max 使用上游 modkit 与启动器编排。当前尚未完成适配，暂不提供安装、启停或商城入口。</p>';pages.get('mods').append(modSection);
 const profileSection=document.createElement('section');profileSection.innerHTML='<h2>本机管理员</h2><p id="admin-profile">登录后读取账号</p><form id="rename-admin-form"><label>新的管理员账号<input id="rename-admin-name" required minlength="3" maxlength="32" pattern="[A-Za-z0-9_-]{3,32}" autocomplete="username"></label><label>当前密码<input id="rename-admin-password" type="password" required maxlength="256" autocomplete="current-password"></label><button class="primary">保存账号名称</button></form><p id="rename-admin-status" role="status">改名不会修改游戏账号，也不会更改管理员密码。</p>';pages.get('settings').prepend(profileSection);
 $('rename-admin-form').onsubmit=e=>{e.preventDefault();run(async()=>{const r=await api('/api/admin/profile',{username:$('rename-admin-name').value,password:$('rename-admin-password').value});$('rename-admin-password').value='';$('admin-profile').textContent='当前管理员：'+r.username;$('username').value=r.username;$('rename-admin-status').textContent='账号名称已保存，其他登录会话已失效。';});};
 async function loadProfile(){try{const r=await api('/api/admin/profile');window.managerProfile=r;document.querySelector('aside small').textContent='MeowGM · '+r.version;profileSection.hidden=!!r.localMode;$('admin-profile').textContent='当前管理员：'+r.username;$('rename-admin-name').value=r.username;window.dispatchEvent(new CustomEvent('meow-profile',{detail:r}));}catch{}}

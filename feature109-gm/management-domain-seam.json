@@ -1,0 +1,186 @@
+{
+  "contract": "gm-management-domain-seam-v1-candidate",
+  "domainSqlOwner": "Feature109 character-rename and guild-hall",
+  "gmResponsibility": [
+    "management_api",
+    "server_rbac",
+    "audit",
+    "consumer"
+  ],
+  "currentPublicMenu": [
+    "service_status",
+    "account_read",
+    "character_read",
+    "progress_read",
+    "auction_audit_unavailable"
+  ],
+  "currentPublicWriteRoutes": [],
+  "renameOrGuildMenuEnabled": false,
+  "localTestAssist": "requires_explicit_trusted_host_capability_not_local_window_token_or_player_role_alone",
+  "candidateCapabilitiesNotGranted": [
+    "gm.local.guild.read",
+    "gm.local.guild.adjust"
+  ],
+  "readRequirements": {
+    "guild": [
+      "instanceId",
+      "realm",
+      "accountId",
+      "characterId",
+      "guildId",
+      "resourceRevision",
+      "catalogRevision",
+      "sourceFingerprint",
+      "authoritativeResourceBounds",
+      "pendingTask_or_taskList_final_shape_to_be_agreed"
+    ],
+    "guildTask": [
+      "taskId",
+      "taskRevision",
+      "catalogRevision",
+      "npcId",
+      "fromLevel",
+      "toLevel",
+      "startedAt",
+      "deadline",
+      "state",
+      "verifiedCommittedCostReceiptReference"
+    ],
+    "rename": [
+      "trustedTarget",
+      "characterRevision",
+      "inventoryRevision",
+      "normalizationVersion",
+      "policyVersion",
+      "resourceFingerprint",
+      "lastRenamedAt",
+      "nextRenameAt",
+      "nextCardPurchaseAt"
+    ]
+  },
+  "writePreconditions": [
+    "server_resolved_actor_target_and_permission",
+    "expected_resource_catalog_task_or_character_inventory_revisions",
+    "authoritative_policy_and_resource_ready",
+    "domain_transaction_available",
+    "stable_operation_id_full_payload_fingerprint"
+  ],
+  "receiptRequirements": [
+    "operationId",
+    "actorReference",
+    "realm",
+    "targetReference",
+    "canonicalRequestHash",
+    "committedAt",
+    "resultRevision",
+    "domainOutcome",
+    "replayed"
+  ],
+  "receiptVerification": "committed_domain_fact_not_client_paid_boolean_or_arbitrary_receipt_string",
+  "auditRequirements": [
+    "stable_request_correlation",
+    "verified_actor_reference",
+    "operation_and_target",
+    "resource_and_policy_versions",
+    "before_after_change_summary",
+    "committed_or_rejected_outcome",
+    "replay_or_conflict"
+  ],
+  "auditPrivacy": "no_password_token_raw_item_snapshot_or_unnecessary_personal_data",
+  "unavailableConditions": [
+    "no_verified_current_resource",
+    "no_rename_card_id",
+    "no_native_protocol_contract",
+    "no_guild_resource_bounds_or_task_paid_receipt",
+    "missing_authorization_or_audit",
+    "domain_transaction_not_integrated"
+  ],
+  "currentEvidence": "reference_UI_ids_are_not_current_resource_authority; Client confirms rename opcode/card/encoding/notification unknown",
+  "noSuccessSimulation": true,
+  "noPublicApply": true,
+  "renameDomainCandidate": {
+    "evidence": "Feature109/character-rename/review.json",
+    "status": "private_static_sql_helper_not_compiled_or_run",
+    "notIntegrated": [
+      "original_Use_transaction_hook",
+      "card_debit_hook",
+      "shop_purchase_hook",
+      "character_creation_namespace_migration"
+    ],
+    "gmMustNot": [
+      "call_internal_helper_with_separate_commit",
+      "trust_receipt_string_as_card_debit_proof",
+      "activate_without_real_name_card_adapters_and_activation_gate"
+    ],
+    "activation": "NotReady_until_owner_hooks_and_evidence_verified"
+  },
+  "guildDomainCandidate": {
+    "evidence": "Feature109/guild-hall/run-20261025-001123/receipt.json",
+    "status": "private_sqlite_candidate_17_checks_reported_and_receipt_reviewed_not_integrated",
+    "candidateBoundary": [
+      "owned_character_and_existing_guild_leader_recheck",
+      "resource_state_CAS_debit_task_paid_receipt_audit_one_transaction",
+      "complete_matches_task_revision_actual_start_receipt_and_fee_delta",
+      "force_uses_same_internal_completion_path"
+    ],
+    "stillUnavailable": [
+      "verified_current_catalog",
+      "approved_legacy_resource_seed_migration",
+      "contract_cost_rules",
+      "GM_authorization_and_route",
+      "MySQL_parity",
+      "concurrent_multi_process_tests",
+      "actual_current_quote_adapter"
+    ],
+    "gmMustNot": [
+      "enable_force_from_browser_boolean",
+      "seed_default_guild_economy",
+      "call_internal_completion_without_permission",
+      "claim_sql_candidate_as_runtime_pass"
+    ],
+    "runtimeEvidence": {
+      "passed": 17,
+      "inputPins": 287,
+      "inputsUnchanged": true,
+      "scope": "actual existing ownership and candidate SQLite resource/paidtask/receipt/audit CAS; synthetic resources/prices",
+      "faultRollbackSites": 4,
+      "raceScope": "sequential stale CAS only not concurrent multi-process",
+      "executedByGM": false
+    },
+    "resourceEvidence": {
+      "path": "Feature109/guild-hall/resource-probe-20261025-004159/concordance.json",
+      "sha256": "5590dca5589b0dee371d4297bfc822ddc653226c768e157af41e6a73fca61b1b",
+      "currentNpcMappingConfirmed": [
+        400001060,
+        400001061,
+        400001062,
+        400001063,
+        400001064,
+        400001065,
+        400001066,
+        400001067
+      ],
+      "automaticCatalogReady": false,
+      "notInferred": [
+        "role_argument_zero_is_not_price_or_grade",
+        "growth_animation_count_is_not_max_level",
+        "warehouse_creation_rules_are_not_hall_bounds"
+      ],
+      "recipeFieldsRemainUnknown": [
+        "costs",
+        "duration",
+        "maximumLevel",
+        "requiredGuildGrade",
+        "contractPrice"
+      ]
+    },
+    "readObservation": {
+      "source": "Feature109/guild-hall/SqliteGuildHallObservation.cs.candidate.txt",
+      "receipt": "Feature109/guild-hall/ObservationChecks/run-20261025-012455/receipt.json",
+      "authorReportedChecks": 13,
+      "gmExecuted": false,
+      "review": "GM/feature109-gm/guild-observation-contract.json",
+      "scope": "private SQLite producer with synthetic catalog not route/auth/current resource proof"
+    }
+  }
+}

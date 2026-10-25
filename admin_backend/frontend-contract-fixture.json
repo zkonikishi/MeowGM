@@ -1,0 +1,13 @@
+{
+  "fixtureOnly": true,
+  "productionEndpointAvailable": false,
+  "authenticationImplemented": false,
+  "purpose": "Isolated frontend error-state contract checks only; never ship as authentication or production data",
+  "cases": [
+    {"name": "not-authenticated", "status": 401, "body": {"error": {"code": "invalid_admin_token"}}},
+    {"name": "missing-permission", "status": 403, "body": {"error": {"code": "admin_scope_required"}}},
+    {"name": "identity-not-connected", "status": 503, "body": {"error": {"code": "admin_backend_not_ready"}}},
+    {"name": "reader-not-connected", "status": 503, "body": {"error": {"code": "admin_resource_unavailable"}}},
+    {"name": "audit-not-connected", "status": 503, "body": {"error": {"code": "admin_audit_unavailable"}}}
+  ]
+}

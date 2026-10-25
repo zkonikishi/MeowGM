@@ -1,0 +1,173 @@
+{
+  "contract": "mrad-character-rename-v1-candidate",
+  "status": "static_not_implemented_or_enabled",
+  "scope": "game_character_name_not_platform_oo_username",
+  "publicAdminWriteEnabled": false,
+  "authority": {
+    "target": [
+      "realm",
+      "accountId",
+      "characterId"
+    ],
+    "resolveFrom": "trusted_game_session_and_existing_character_store",
+    "ooFieldIsDisplayOnly": true,
+    "mustRecheckOwnershipInTransaction": true
+  },
+  "unverifiedInputs": {
+    "renameCardItemId": null,
+    "renameCardResourceFingerprint": null,
+    "shopProductAndPurchaseOpcode": null,
+    "renameSubmitOpcodeAndWireFields": null,
+    "nativeNameEncodingAndValidation": null,
+    "normalizationAlgorithmAndDatabaseCollation": null,
+    "legacyNameCollisionMigration": null,
+    "onlineSessionRenameInvalidationProtocol": null
+  },
+  "policy": {
+    "renameAndCardPurchaseCooldownSeconds": 7776000,
+    "oldNameReservationSeconds": 15552000,
+    "boundary": "allowed_at_now_greater_or_equal_until",
+    "clock": "trusted_server_utc_once_per_transaction",
+    "noSameOwnerReservationBypass": true,
+    "deletedCharacterNameRetention": "separate_unconfirmed_requirement_no_automatic_release",
+    "rollbackOrFutureClock": "reject_not_clamp"
+  },
+  "normalization": {
+    "algorithm": "must_reuse_verified_character_creation_and_name_validation_contract",
+    "versionRequired": true,
+    "notAllowed": [
+      "guess_NFKC",
+      "guess_lowercase",
+      "browser_supplied_normalized_key",
+      "auto_merge_collisions"
+    ],
+    "persist": [
+      "display_name",
+      "validated_native_name_bytes",
+      "normalization_version",
+      "normalized_name_key"
+    ],
+    "uniqueness": "one_atomic_namespace_for_active_names_and_unexpired_reservations_with_verified_realm_scope",
+    "existingDuplicateOrCollationConflict": "explicit_migration_block_no_implicit_rename"
+  },
+  "conceptualRecordsNotApprovedSchema": {
+    "nameClaim": [
+      "namespace",
+      "normalizationVersion",
+      "normalizedNameKey",
+      "state:active|reserved",
+      "characterId",
+      "reservedUntil",
+      "revision"
+    ],
+    "characterRenameState": [
+      "realm",
+      "characterId",
+      "revision",
+      "lastRenamedAt",
+      "nextRenameAt"
+    ],
+    "receipt": [
+      "operationId",
+      "actorIdentity",
+      "realm",
+      "accountId",
+      "characterId",
+      "canonicalRequestHash",
+      "oldName",
+      "newName",
+      "cardInstanceId",
+      "committedAt",
+      "resultRevision"
+    ]
+  },
+  "preview": {
+    "nameCheckIsNotReservation": true,
+    "response": [
+      "available",
+      "targetRevision",
+      "policyVersion",
+      "normalizationVersion",
+      "checkedAt",
+      "nextRenameAt",
+      "nextCardPurchaseAt"
+    ],
+    "noSideEffects": true,
+    "unreadyDependencies": "unavailable_not_available_true"
+  },
+  "renameCommand": {
+    "fields": [
+      "operationId",
+      "expectedCharacterRevision",
+      "expectedInventoryRevision",
+      "expectedPolicyVersion",
+      "expectedResourceFingerprint",
+      "newDisplayName",
+      "cardInstanceReference"
+    ],
+    "neverTrust": [
+      "accountId_from_browser",
+      "normalizedNameKey_from_browser",
+      "lastRenamedAt_from_browser",
+      "cardPaid_boolean",
+      "cooldownOverride"
+    ],
+    "transactionOrder": [
+      "lookup_existing_receipt_by_stable_operation_id_and_verify_full_actor_target_payload_fingerprint_before_any_debit",
+      "lock_or_compare_existing_character_and_inventory_revisions_recheck_trusted_owner_and_rename_cooldown",
+      "validate_name_bytes_and_normalize_using_verified_version_and_actual_database_collation",
+      "claim_target_key_with_unique_namespace_constraint_reject_active_or_unexpired_reservation_including_same_owner",
+      "validate_actual_bound_card_instance_type_expiry_quantity_and_resource_fingerprint_in_original_inventory_store",
+      "debit_exact_card_once_via_existing_inventory_transaction_not_client_boolean",
+      "replace_current_active_name_claim_with_old_name_reservation_until_now_plus_180days_and_new_active_claim",
+      "update_character_name_name_bytes_last_rename_next_rename_and_revision",
+      "commit_card_debit_character_name_claims_rename_state_receipt_and_required_audit_atomically"
+    ],
+    "failure": "all_mutations_rollback_including_card_and_name_claim",
+    "replay": "same_key_same_identity_and_payload_returns_original_result_even_after_cooldown_changed",
+    "keyConflict": "same_key_different_actor_target_or_payload_reject",
+    "notification": "after_commit_only_retry_notification_without_repeating_transaction"
+  },
+  "cardPurchase": {
+    "gate": "server_rechecks_same_character_last_rename_and_90day_cooldown_inside_purchase_commit",
+    "concurrentRename": "serialize_on_same_character_revision_or_lock_no_preview_only_gate",
+    "deliveryAndCharge": "reuse_existing_shop_transaction_and_receipt_not_new_payment_store",
+    "crossCharacterOrAccountWideRestriction": "unknown_do_not_expand_character_policy_without_evidence",
+    "websiteStore": "not_authorized_to_sell_rename_card_until_actual_product_and_fulfillment_verified"
+  },
+  "staticNegativeMatrix": [
+    "same_name_race_with_create",
+    "same_name_race_two_renames",
+    "expired_reservation_boundary",
+    "same_owner_old_name_before_180days",
+    "90day_boundary_and_purchase_race",
+    "future_last_renamed_at",
+    "invalid_encoding_or_normalization_collision",
+    "cross_account_or_realm_target",
+    "stale_character_or_inventory_revision",
+    "wrong_card_type_expired_missing_or_duplicated_instance",
+    "after_card_debit_failure_rolls_back_everything",
+    "receipt_commit_failure",
+    "same_operation_replay_after_reopen",
+    "same_key_different_target_or_name",
+    "rename_commit_success_notification_failure",
+    "deleted_character_old_name_policy_unknown",
+    "database_backend_collation_parity"
+  ],
+  "ownership": {
+    "domainAndSqlCandidate": "Feature109/character-rename",
+    "gm": "management_api_rbac_audit_consumer_only",
+    "notOwner": "UserSystem OO ProfileChangeLogin is unrelated"
+  },
+  "clientEvidence": {
+    "status": "unknown_confirmed_by_Client",
+    "renameOpcode": null,
+    "purchaseOpcode": null,
+    "renameSpecificEncoding": null,
+    "onlineRenameNotification": null,
+    "doNotSubstitute": [
+      "character_creation_fields",
+      "generic_character_refresh_packet"
+    ]
+  }
+}

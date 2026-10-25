@@ -1,0 +1,9 @@
+#mrad-panel .mrad-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+#mrad-panel .mrad-grid>section{min-width:0;padding:16px;border:1px solid #344353;border-radius:8px}
+#mrad-panel select{width:100%;min-height:150px;background:#17222e;color:#e8edf4;border:1px solid #344353;padding:8px}
+#mrad-panel dl{display:grid;grid-template-columns:minmax(85px,1fr) minmax(0,2fr);gap:8px;font-size:13px}
+#mrad-panel dt{color:#aebccc}#mrad-panel dd{margin:0;overflow-wrap:anywhere}
+#mrad-panel ul{max-height:240px;overflow:auto;padding-left:20px}
+#mrad-panel p{line-height:1.7;overflow-wrap:anywhere}
+#mrad-panel label{display:block;margin:12px 0 6px}
+@media(max-width:800px){#mrad-panel .mrad-grid{grid-template-columns:1fr}}

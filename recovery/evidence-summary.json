@@ -1,0 +1,40 @@
+{
+  "product": "Mrad Max",
+  "publicVersion": null,
+  "displayVersion": "开发快照（发布序号待定）",
+  "publication": "source recovery only, no release or deployed admin service",
+  "validationNotRerunForBackup": true,
+  "existingEvidence": [
+    {
+      "scope": "independent admin verifier and WSGI memory checks",
+      "checks": 23,
+      "limitation": "no real issuer/HTTP deployment"
+    },
+    {
+      "scope": "tower snapshot consumer including explicit producer representation adapter",
+      "checks": 21,
+      "limitation": "manual synthetic fixtures, not producer/runtime authorization"
+    },
+    {
+      "scope": "product version parser",
+      "checks": 5
+    },
+    {
+      "scope": "store identity and fulfillment classification",
+      "checks": 8,
+      "limitation": "no order, payment, grant or package-use approval"
+    },
+    {
+      "scope": "controller real DOM whole-script fixtures",
+      "evidence": "separate baseline, blank-job glue and fixed-job glue receipts retained privately",
+      "limitation": "synthetic fetch and mail/inventory adapters, no real auth/mail/deployment"
+    }
+  ],
+  "currentBlocks": [
+    "OO project authorization/revocation/public keys and trusted audit host not connected",
+    "guild real catalog/seed/migration and privileged route not enabled",
+    "character rename original inventory/card/shop/create hooks and native evidence not integrated",
+    "no new production writes or public admin activation"
+  ],
+  "ownership": "GM sources only; domain candidates preserved as historical handoff, active domain owner is separate Feature109 project"
+}

@@ -1,0 +1,492 @@
+{
+  "credentialPatternFindings": 0,
+  "largeFileFindings": 0,
+  "sourceSelectionCount": 75,
+  "publicNamingComplete": false,
+  "remainingCompatibilityOrLanguageLines": [
+    {
+      "path": "admin_backend/test_admin_backend.py",
+      "line": 62,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "admin_backend/ui/index.html",
+      "line": 2,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "apps/admin/environment.js",
+      "line": 8,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "apps/admin/index.html",
+      "line": 1,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "apps/admin/launcher-config.js",
+      "line": 20,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "apps/admin/launcher-config.js",
+      "line": 27,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "apps/admin/meowpay.js",
+      "line": 6,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "feature109-gm/browser-fixture/bootstrap.js",
+      "line": 45,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "feature109-gm/browser-fixture/server.cjs",
+      "line": 8,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "feature109-gm/browser-glue-fixture/bootstrap.js",
+      "line": 37,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "feature109-gm/browser-glue-fixture/server.cjs",
+      "line": 8,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "feature109-gm/rename-data-contract.json",
+      "line": 138,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Delta109.csproj",
+      "line": 4,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Delta109.csproj",
+      "line": 5,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Delta109.csproj",
+      "line": 6,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Program.cs",
+      "line": 3,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Program.cs",
+      "line": 15,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Program.cs",
+      "line": 16,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Program.cs",
+      "line": 56,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Program.cs",
+      "line": 58,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Program.cs",
+      "line": 64,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Program.cs",
+      "line": 65,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Program.cs",
+      "line": 68,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-109-delta/Program.cs",
+      "line": 80,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 4,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 8,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 9,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 13,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 14,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 19,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 24,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 32,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 44,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 45,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 46,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 48,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 52,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 53,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 54,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 55,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 58,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 59,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 60,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 61,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 62,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 64,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 66,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 69,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 70,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 74,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/CnSearchChecks.cs",
+      "line": 78,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/Program.cs",
+      "line": 8,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/Program.cs",
+      "line": 9,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/Program.cs",
+      "line": 10,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Checks/Program.cs",
+      "line": 185,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 8,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 9,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 10,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 11,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 12,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 13,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 16,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 17,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 20,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 22,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 23,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 27,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 29,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 31,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 36,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 37,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 43,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 44,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 54,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 61,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 64,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 67,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 73,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "server-auction-domain/Mrad.Auction.Domain/CnItemCatalog.cs",
+      "line": 81,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "services/gateway/test_mrad_audit.py",
+      "line": 9,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/audit_public_branding.py",
+      "line": 7,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/audit_store_catalog.py",
+      "line": 1,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/audit_store_catalog.py",
+      "line": 41,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/audit_store_catalog.py",
+      "line": 46,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/audit_store_catalog.py",
+      "line": 48,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/audit_store_catalog.py",
+      "line": 53,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/classify_store_fulfillment.py",
+      "line": 13,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/classify_store_fulfillment.py",
+      "line": 18,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/classify_store_fulfillment.py",
+      "line": 34,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/classify_store_fulfillment.py",
+      "line": 36,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/export_cn_auction_sample.py",
+      "line": 24,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/mrad-ui-smoke.cjs",
+      "line": 21,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/start_mrad_console.py",
+      "line": 29,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/test_store_catalog.py",
+      "line": 27,
+      "kind": "internal-compatibility-or-language-residual"
+    },
+    {
+      "path": "tools/test_store_fulfillment_classification.py",
+      "line": 6,
+      "kind": "internal-compatibility-or-language-residual"
+    }
+  ],
+  "excluded": [
+    ".runtime",
+    "dist",
+    "all controller-evidence original receipts/screenshots",
+    "new operational MD files",
+    "README with local integration-document links pending coordinated public cleanup"
+  ],
+  "unchangedThirdPartyAttribution": true,
+  "claim": "existing internal protocol/profile/path and language identifiers retained; no full cleanup claim"
+}

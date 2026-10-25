@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><title>Mrad Max · 隔离胶水链验证</title>
+<style>body{font:16px system-ui;margin:24px;background:#f3f5fa;color:#192133}header{background:#ffe4ac;padding:16px;border:2px solid #965500}button,input,select{font:inherit;margin:5px;padding:6px}table{width:100%;background:white}td{padding:6px;border-bottom:1px solid #ddd}.hidden,[hidden]{display:none!important}.controls{border:1px solid #8592aa;margin:16px 0;padding:12px}nav button.active{background:#cadbff}#mail-overlay{background:#fff;border:2px solid #778;padding:15px}pre{white-space:pre-wrap;max-height:230px;overflow:auto}</style></head>
+<body><header><strong>No real auth · 仅合成数据／隔离 DOM fixture</strong><p>无真实账号、权限、邮件或游戏服务。生产脚本完整只读载入；所有写调用与外网连接拒绝。</p></header>
+<section class="controls"><button id="fixture-other-recipient">调用其他收件人 afterMailDelivery（无邮件）</button><button id="fixture-empty-rows">合成角色表置空并真实 refresh</button><button id="fixture-normal-rows">恢复角色表并真实 refresh</button><h2>合成目标／事件控制</h2><button id="fixture-a">选择合成角色 A</button><button id="fixture-b">选择合成角色 B</button><button id="fixture-clear">取消角色</button><button id="fixture-refresh">调用真实 afterMailDelivery（无邮件）</button><button id="fixture-delay">延迟下一装备查询</button><button id="fixture-release">释放旧响应</button><p id="fixture-status">准备中</p></section>
+<nav><button data-tab="stackables">物品</button><button data-tab="give">装备</button><button data-tab="mail">合成邮件占位（非邮件UI）</button><button data-tab="cubes">晶体（不测）</button></nav>
+<section data-panel="stackables"><h2>物品</h2><form id="stack-search"><input id="stack-query" aria-label="物品关键词"><button>搜索</button><button type="button" id="stack-reset">重置</button></form><nav id="stack-type-nav"></nav><table><tbody id="stack-results"></tbody></table><button id="stack-prev">上一页</button><span id="stack-page"></span><button id="stack-next">下一页</button></section>
+<section data-panel="give" hidden><h2>装备</h2><form id="item-search"><input id="item-query" aria-label="装备关键词"><input id="item-min-level" type="number" aria-label="最低等级"><input id="item-max-level" type="number" aria-label="最高等级"><select id="item-rarity" aria-label="稀有度"><option value="">全部</option></select><select id="item-job" aria-label="职业">
+              <option value="">全部职业</option>
+              <option value="swordman">男鬼剑士</option>
+              <option value="fighter">女格斗家</option>
+              <option value="gunner">男神枪手</option>
+              <option value="mage">女魔法师</option>
+              <option value="priest">男圣职者</option>
+              <option value="at gunner">女神枪手</option>
+              <option value="thief">暗夜使者</option>
+              <option value="at fighter">男格斗家</option>
+              <option value="at mage">男魔法师</option>
+              <option value="demonic swordman">黑暗武士</option>
+              <option value="creator mage">缔造者</option>
+              <option value="at swordman">女鬼剑士</option>
+              <option value="knight">守护者</option>
+              <option value="demonic lancer">魔枪士</option>
+              <option value="at priest">女圣职者</option>
+              <option value="gun blader">枪剑士</option><option value="archer">弓箭手</option><option value="imperial knight">帝国骑士</option>
+            </select><select id="item-page-size" aria-label="页大小"><option value="30">30</option><option value="10">10</option></select><button>搜索</button><button type="button" id="item-filter-reset">重置</button></form><nav id="item-category-nav"></nav><p id="item-total"></p><table><tbody id="item-results"></tbody></table><button id="item-prev">上一页</button><span id="item-page"></span><button id="item-next">下一页</button></section>
+<section data-panel="mail" hidden>只调用合成mail loader，不是真实邮箱。</section><section data-panel="cubes" hidden><button id="cube-refresh">读取晶体（禁用）</button><p id="cube-status"></p><div id="cube-cards"></div></section>
+<section id="mail-overlay" class="hidden"><form id="mail-form"><div class="mail-dialog-heading"><h2 id="mail-item-name"></h2><p class="hint"></p></div><p id="mail-item-meta"></p><img id="mail-item-icon-image" alt=""><p id="mail-target"></p><div class="mail-field"><small></small></div><label>数量<input id="equipment-count" type="number" value="1"></label><div id="equipment-upgrades"><input id="equipment-upgrade" type="number" value="0"><select id="equipment-amplify"><option value="0">无</option></select><input id="equipment-forging" type="number" value="0"></div><p id="mail-state"></p><button id="equipment-send">发放（必须禁用）</button><button type="button" id="mail-close">关闭</button><button type="button" id="mail-cancel">取消</button></form></section>
+<section><h2>实际app110依赖DOM（合成）</h2><span id="status"></span><p id="message"></p><button id="refresh">真实 refresh（合成GET）</button><input id="search" aria-label="合成角色搜索"><ul id="characters"></ul><p id="selected"></p><div id="content"><form id="level-form"><input id="level"><button class="write">禁用</button></form><form id="gold-form"><input id="gold"><button class="write">禁用</button></form><form id="cera-form"><input id="cera"><button class="write">禁用</button></form><button id="give" class="write">禁用武器邮件</button><button id="mail-refresh">合成mail loader</button></div></section><h2>真实胶水函数链观察（读取数据仍为合成）</h2><p>应先在装备页选fighter并到第2页，再调用真实afterMailDelivery。同收件人预期单次真实选择事件；其他收件人预期0事件/0读取。不是邮件后台验收。</p><pre id="glue-chain-observation">尚未执行链路；不可视为通过。</pre><h2>合成调用及拒绝记录</h2><pre id="fixture-log"></pre>
+<script src="/bootstrap.js"></script><script src="/source/ui-feedback.js"></script><script src="/source/app110.js"></script><script src="/source/equipment.js"></script><script src="/controls.js"></script>
+</body></html>

@@ -1,0 +1,112 @@
+{
+  "scope": "real DOM with whole production scripts, synthetic mock data, no auth or real mail",
+  "execution": "controller browser tool after static review; each segment <=60 seconds",
+  "segments": [
+    {
+      "name": "stack-pagination",
+      "steps": [
+        "open ready URL",
+        "click #stack-next twice then #stack-prev"
+      ],
+      "expected": [
+        "initial #stack-page 第 1 / 3 页 · 共 61 件",
+        "page2 has 30 rows",
+        "page3 has 1 row and #stack-next disabled",
+        "previous returns page2"
+      ]
+    },
+    {
+      "name": "stack-filter-reset",
+      "steps": [
+        "fill #stack-query with 不存在 and submit #stack-search",
+        "click #stack-reset",
+        "click 合成材料 in #stack-type-nav",
+        "click #stack-reset"
+      ],
+      "expected": [
+        "empty result footer 1/1 total0 with 已筛选 and no-result row",
+        "reset query empty total61 and no filter marker",
+        "type material total30 marker present",
+        "reset returns all61, first page and both nav state correct"
+      ]
+    },
+    {
+      "name": "equipment-bootstrap",
+      "steps": [
+        "click data-tab=give",
+        "select fighter in #item-job",
+        "submit #item-search",
+        "click #item-next"
+      ],
+      "expected": [
+        "on tab first page1/3, selected character A defaults swordman",
+        "submitted query job=1 in synthetic call log",
+        "page2/3 with 30 rows, item-job remains fighter"
+      ]
+    },
+    {
+      "name": "same-CID-refresh",
+      "steps": [
+        "from equipment page2 fighter click #fixture-refresh"
+      ],
+      "expected": [
+        "page remains2/3 and fighter remains selected",
+        "synthetic query offset30/job1",
+        "no API write or real mail request; this is only refresh event evidence"
+      ]
+    },
+    {
+      "name": "different-CID-and-deselect",
+      "steps": [
+        "click #fixture-b",
+        "click #fixture-clear",
+        "click #fixture-a"
+      ],
+      "expected": [
+        "B resets page1 and defaults fighter",
+        "deselect resets page1 and job empty",
+        "A resets page1 and defaults swordman",
+        "GmFixture.snapshot shows only synthetic targets"
+      ]
+    },
+    {
+      "name": "delayed-old-response",
+      "steps": [
+        "click #fixture-delay",
+        "fill #item-query 合成装备 and submit",
+        "fill #item-query 不存在 and submit",
+        "click #fixture-release"
+      ],
+      "expected": [
+        "one old response held",
+        "fresh result total0 and page1/1",
+        "release old response does not overwrite no-result DOM"
+      ]
+    },
+    {
+      "name": "tab-return-observation",
+      "steps": [
+        "clear equipment query, choose fighter, submit and go page2",
+        "click stackables tab then give tab"
+      ],
+      "expected": [
+        "record actual result; current production give-tab handler calls selectCharacterJob/search so page1/swordman expected",
+        "do not count tab-return reset as failure of same-CID mail-event requirement"
+      ]
+    },
+    {
+      "name": "blocked-writes",
+      "steps": [
+        "open first equipment row 发放 modal",
+        "inspect #equipment-send then close modal"
+      ],
+      "expected": [
+        "send button disabled because onlineMailReady=false",
+        "no successful auth/session, no actual mail call",
+        "known icon CSP failures expected, no unexpected JS error or unhandled rejection"
+      ]
+    }
+  ],
+  "evidence": "controller-evidence/receipt.json",
+  "status": "controller_observations_recorded_see_receipt_no_invented_pass_count"
+}

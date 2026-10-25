@@ -5,7 +5,7 @@
   if(!response.ok)throw Error('GM 界面资源加载失败');
   const view=await response.text();
   document.documentElement.classList.add('gm-window');
-  document.body.insertAdjacentHTML('beforeend',`<header id="titlebar"><div class="tb-brand"><div class="meow-mark">M</div><div><div class="tb-title">MeowGM · GM 工具</div><div class="tb-sub">115US · 独立管理窗口</div></div></div><div id="gmGlobalTarget" aria-label="全局管理对象"><label for="gmAccount">账号</label><select id="gmAccount"><option value="">请选择账号</option></select><label for="gmStudioRole">角色</label><select id="gmStudioRole" aria-label="当前角色"><option value="">请选择角色</option></select></div><div id="tbDrag" class="tb-drag"></div><div class="tb-actions"><button class="btn" id="gmConnectionOpen">服务器连接</button><button class="btn" id="gmModsOpen">MOD 管理</button><button class="btn" id="gmActivitiesOpen">游戏活动</button><button class="btn" id="gmToolsOpen">工具</button><button class="tb-btn" data-native="minimize" aria-label="最小化">−</button><button class="tb-btn" data-native="maximize" aria-label="最大化">□</button><button class="tb-btn tb-close" data-native="close" aria-label="关闭">×</button></div></header><main id="main"><div id="content">${view}</div></main><dialog id="gmTools"><header class="gm-tools-heading"><h2>MeowGM 工具</h2><button class="btn" id="gmToolsClose">关闭</button></header><nav id="gmToolsNav" aria-label="工具功能"></nav><p id="gmToolsStatus" role="status"></p><div id="gmToolsContent"></div></dialog>`);
+  document.body.insertAdjacentHTML('beforeend',`<header id="titlebar"><div class="tb-brand"><div class="meow-mark">M</div><div><div class="tb-title">MeowGM · GM 工具</div><div class="tb-sub">Mrad Max · 独立管理窗口</div></div></div><div id="gmGlobalTarget" aria-label="全局管理对象"><label for="gmAccount">账号</label><select id="gmAccount"><option value="">请选择账号</option></select><label for="gmStudioRole">角色</label><select id="gmStudioRole" aria-label="当前角色"><option value="">请选择角色</option></select></div><div id="tbDrag" class="tb-drag"></div><div class="tb-actions"><button class="btn" id="gmConnectionOpen">服务器连接</button><button class="btn" id="gmModsOpen">MOD 管理</button><button class="btn" id="gmActivitiesOpen">游戏活动</button><button class="btn" id="gmToolsOpen">工具</button><button class="tb-btn" data-native="minimize" aria-label="最小化">−</button><button class="tb-btn" data-native="maximize" aria-label="最大化">□</button><button class="tb-btn tb-close" data-native="close" aria-label="关闭">×</button></div></header><main id="main"><div id="content">${view}</div></main><dialog id="gmTools"><header class="gm-tools-heading"><h2>MeowGM 工具</h2><button class="btn" id="gmToolsClose">关闭</button></header><nav id="gmToolsNav" aria-label="工具功能"></nav><p id="gmToolsStatus" role="status"></p><div id="gmToolsContent"></div></dialog>`);
   document.title='MeowGM · GM 工具';
   const showVersion=profile=>{if(profile?.version)document.querySelector('#titlebar .tb-sub').textContent='MeowGM '+profile.version+' · 独立管理窗口';};
   showVersion(window.managerProfile);window.addEventListener('meow-profile',event=>showVersion(event.detail));
@@ -19,17 +19,17 @@
   function openGMTab(name){showWorkspace(false);for(const button of side.children)button.classList.toggle('active',button.dataset.section===name);root.querySelector('[data-gm-tab="'+name+'"]').click();}
   for(const [label,key,action] of [
     ['管理大厅','home',()=>showWorkspace(true)],['角色属性','character',()=>openGMTab('character')],['物品与装备','equipment',()=>openGMTab('equipment')],['任务与晶体','quests',()=>openGMTab('quests')],['副本难度','difficulty',()=>openGMTab('difficulty')],
-    ['目标与连接','tool',()=>openTool('connections')],['MOD / 插件','tool',()=>openTool('mods')],['PVF / 客户端','tool',()=>openTool('launcher')],['游戏活动','tool',()=>openTool('activities')],['控制台','tool',()=>openTool('deploy')],['设置','tool',()=>openTool('settings')]
+    ['Mrad 只读管理','tool',()=>openTool('mrad')],['目标与连接','tool',()=>openTool('connections')],['MOD / 插件','tool',()=>openTool('mods')],['PVF / 客户端','tool',()=>openTool('launcher')],['游戏活动','tool',()=>openTool('activities')],['控制台','tool',()=>openTool('deploy')],['设置','tool',()=>openTool('settings')]
   ]){const button=document.createElement('button');button.className='btn';button.dataset.section=key;button.textContent=label;button.onclick=action;side.append(button);}
   $('meowLobbyConfigure').onclick=()=>openTool('connections');$('meowLobbyConnect').onclick=()=>openTool('native-gm');$('meowLobbyCharacter').onclick=()=>openGMTab('character');
-  async function refreshLobby(){try{const data=await api('/api/admin/environment');$('meowLobbyTarget').textContent=(data.productMode==='custom'?'自定义（内部）':'通用')+' · '+(data.mode==='cloud'?'云端':'本地')+' · '+(data.root||'尚未填写根目录');$('meowLobbyState').textContent=data.message;$('meowLobbyConnect').disabled=data.mode==='cloud';$('meowLobbyConnect').title=data.mode==='cloud'?'云端管理协议待协商，请切换本地目标后连接':'';}catch(e){$('meowLobbyState').textContent=e.message;}}
+  async function refreshLobby(){if(window.managerProfile?.mradOnly)return;try{const data=await api('/api/admin/environment');if(window.managerProfile?.mradOnly||!$('meowLobbyTarget'))return;$('meowLobbyTarget').textContent=(data.productMode==='custom'?'自定义（内部）':'通用')+' · '+(data.mode==='cloud'?'云端':'本地')+' · '+(data.root||'尚未填写根目录');$('meowLobbyState').textContent=data.message;$('meowLobbyConnect').disabled=data.mode==='cloud';$('meowLobbyConnect').title=data.mode==='cloud'?'云端管理协议待协商，请切换本地目标后连接':'';}catch(e){if($('meowLobbyState'))$('meowLobbyState').textContent=e.message;}}
   window.addEventListener('meow-environment-saved',refreshLobby);
   window.addEventListener('meow-profile',refreshLobby);
   showWorkspace(true);refreshLobby();
   // Imported controls must never imply an available write operation.
   root.querySelectorAll('button,input,select,textarea').forEach(control=>{
     if(control.matches('[data-gm-tab],#gmRefresh'))return;
-    control.disabled=true;control.title='115US 对应管理接口尚未接通';
+    control.disabled=true;control.title='Mrad Max 对应管理接口尚未接通';
   });
   root.querySelectorAll('form').forEach(form=>form.addEventListener('submit',e=>e.preventDefault()));
   $('gmResourceStatus').textContent='本地模式 · 账号/角色查询 · 技能点管理需手动连接本地 GM';
@@ -43,7 +43,7 @@
     $('gmToolsStatus').textContent='';
     if(!$('gmTools').open)$('gmTools').showModal();
   }
-  for(const [key,label] of [['connections','服务器连接'],['native-gm','本地 GM 连接'],['deploy','服务控制台'],['launcher','客户端发布'],['notices','公告与活动'],['mods','MOD 管理'],['activities','游戏活动'],['logs','操作记录'],['settings','设置']]){
+  for(const [key,label] of [['mrad','Mrad 只读管理'],['connections','服务器连接'],['native-gm','本地 GM 连接'],['deploy','服务控制台'],['launcher','客户端发布'],['notices','公告与活动'],['mods','MOD 管理'],['activities','游戏活动'],['logs','操作记录'],['settings','设置']]){
     const page=pages.get(key);page.hidden=true;$('gmToolsContent').append(page);
     const button=document.createElement('button');button.className='btn';button.dataset.tool=key;button.textContent=label;button.onclick=()=>openTool(key);$('gmToolsNav').append(button);
   }
@@ -71,7 +71,7 @@
     if(button.dataset.gmTab!=='character'){
       const pane=$(panes[button.dataset.gmTab]);let note=pane.querySelector('.meow-pending');
       if(!note){note=document.createElement('p');note.className='gm-note meow-pending';pane.prepend(note);}
-      note.textContent=button.textContent+'的 115US 接口尚未接通，当前不读取或修改游戏数据。';
+      note.textContent=button.textContent+'的 Mrad Max 接口尚未接通，当前不读取或修改游戏数据。';
     }
   };
   let accounts=[],characters=[],requestNumber=0;

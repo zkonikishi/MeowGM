@@ -1,6 +1,6 @@
 // Installed server mods are managed only through the bundled upstream modkit.
 const managedModsPage=pages.get('mods');managedModsPage.replaceChildren();
-const modsPanel=document.createElement('section');modsPanel.innerHTML='<h2>MOD 管理</h2><p>读取当前本地 115US 环境中的已安装服务端 MOD，使用上游 modkit 保存启用状态。配置状态与服务端上报分开显示。</p><button id="managed-mods-refresh">刷新 MOD 列表</button><p id="managed-mods-status" role="status">尚未读取；不会自动启动游戏。</p><div id="managed-mods-list"></div><small>安装、卸载涉及客户端文件和服务端编译，当前尚未开放；此处支持已安装服务端 MOD 的启用和停用。</small>';managedModsPage.append(modsPanel);
+const modsPanel=document.createElement('section');modsPanel.innerHTML='<h2>MOD 管理</h2><p>读取当前本地 Mrad Max 环境中的已安装服务端 MOD，使用上游 modkit 保存启用状态。配置状态与服务端上报分开显示。</p><button id="managed-mods-refresh">刷新 MOD 列表</button><p id="managed-mods-status" role="status">尚未读取；不会自动启动游戏。</p><div id="managed-mods-list"></div><small>安装、卸载涉及客户端文件和服务端编译，当前尚未开放；此处支持已安装服务端 MOD 的启用和停用。</small>';managedModsPage.append(modsPanel);
 function showManagedMods(data){
   $('managed-mods-list').replaceChildren();
   for(const mod of data.mods){
@@ -17,7 +17,7 @@ function showManagedMods(data){
 }
 $('managed-mods-refresh').onclick=()=>run(async()=>{showManagedMods(await api('/api/admin/mod-manager'));});
 const activityPage=document.createElement('div');activityPage.dataset.managerPage='activities';activityPage.hidden=true;pages.set('activities',activityPage);$('workspace').append(activityPage);
-const activityPanel=document.createElement('section');activityPanel.innerHTML='<h2>游戏活动</h2><p>节日、副本、掉落活动需要对应的 115US 服务端控制接口。当前上游 GM 未提供统一开启命令，尚不能从此处开启活动。</p><div class="activity-grid"></div><small>签到相关内容来自所选客户端 PVF，运行日期另由服务端日历处理；读取 PVF 不等于开启活动。不会用本地草稿冒充已生效。</small>';activityPage.append(activityPanel);
+const activityPanel=document.createElement('section');activityPanel.innerHTML='<h2>游戏活动</h2><p>节日、副本、掉落活动需要对应的 Mrad Max 服务端控制接口。当前上游 GM 未提供统一开启命令，尚不能从此处开启活动。</p><div class="activity-grid"></div><small>签到相关内容来自所选客户端 PVF，运行日期另由服务端日历处理；读取 PVF 不等于开启活动。不会用本地草稿冒充已生效。</small>';activityPage.append(activityPanel);
 for(const name of ['节日活动','副本活动','掉落活动']){const row=document.createElement('article');row.className='managed-mod-row';const title=document.createElement('h3');title.textContent=name;const text=document.createElement('p');text.textContent='开启状态未知 · 服务端开关尚未接通';const button=document.createElement('button');button.textContent='开启接口待接入';button.disabled=true;row.append(title,text,button);activityPanel.querySelector('.activity-grid').append(row);}
 
 const clientModsPanel=document.createElement('section');

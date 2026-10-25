@@ -1,0 +1,35 @@
+{
+  "contract": "gm-guild-observation-consumer-review-v1",
+  "status": "static_field_review_not_integrated",
+  "producer": "Feature109/guild-hall/SqliteGuildHallObservation.cs.candidate.txt",
+  "transport": "typed_record_only_no_HTTP_or_serializer_naming_policy_confirmed",
+  "wireCasing": "not_assumed_keep_exact_CSharp_record_names_until_host_contract",
+  "snapshotFields": ["InstanceId", "Realm", "AccountId", "CharacterId", "GuildId", "ResourceRevision", "GuildGrade", "CatalogRevision", "SourceFingerprint", "Resources", "ResourceBounds", "Npcs", "Pending", "ObservedAtSeconds", "ManagementWriteEnabled"],
+  "exactDecimalStringFields": ["AccountId", "CharacterId", "GuildId", "ResourceRevision", "GuildGrade", "Resources.Experience", "Resources.Funds", "Resources.Crystals", "ResourceBounds.Minimum.*", "ResourceBounds.Maximum.*", "Npcs[].Id", "Npcs[].ContractUntil", "Pending.Revision", "Pending.Npc", "Pending.Deadline", "ObservedAtSeconds"],
+  "integerFields": ["Npcs[].Level", "Pending.FromLevel", "Pending.ToLevel"],
+  "pending": {
+    "absence": null,
+    "fields": ["Id", "Revision", "Npc", "FromLevel", "ToLevel", "Deadline", "CatalogRevision", "CommittedPaymentVerified"],
+    "committedPaymentVerified": "display_of_actual_producer_receipt_validation_only_not_write_authorization_or_client_payment_proof"
+  },
+  "writeEnabled": false,
+  "differencesFromEarlierGmDraft": [
+    "single Pending record instead of upgrade task list",
+    "Pending.Revision maps to task revision after explicit host mapping",
+    "ObservedAtSeconds is seconds string not UI millisecond number",
+    "no StartedAt or raw costReceiptId required for readonly display; actual payment proof stays producer side",
+    "no per-NPC maximumLevel exposed so client must not infer upgrade eligibility",
+    "no requestId protocolVersion or freshness expiry envelope yet; trusted host must bind latest request and target before UI integration"
+  ],
+  "missingBeforeFrontendIntegration": [
+    "verified_current_catalog_adapter_and_authoritative_legacy_seed",
+    "OO_project_authorization_and_read_scope",
+    "trusted_host_target_instance_realm_and_request_correlation",
+    "serialization_naming_and_error_unavailable_contract",
+    "read_audit_sink_and_route_registration",
+    "explicit_server_clock_and_UI_freshness_envelope"
+  ],
+  "failClosed": ["catalog_not_ready", "missing_migration", "membership_missing", "missing_or_corrupt_pending_payment", "catalog_change_mid_read", "target_mismatch", "ManagementWriteEnabled_not_false"],
+  "noNewStateSource": true,
+  "noPublicApply": true
+}
